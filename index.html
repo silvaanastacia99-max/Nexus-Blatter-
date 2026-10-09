@@ -6,16 +6,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Nexus Battle</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100;height:100%;overflow:hidden;background:#05070b;font-family:Arial,sans-serif;touch-action:none}
+*{box-sizing:border-box}html,body{margin:0;width:100;height:100;overflow:hidden;background:#05070b;font-family:Arial,sans-serif;touch-action:none}
 #game{position:fixed;inset:0}canvas{display:block}
 #hud{position:fixed;inset:0;pointer-events:none;color:white}
-#top{position:absolute;top:12;left:12;right:12px;display:flex;justify-content:space-between;align-items:flex-start}
-.panel{background:(5,8,15,.72);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:8px 11px;backdrop-filter:blur(5px)}
-#hpWrap{width:150}.label{font-size:11px;opacity:.75}.bar{height:10px;background:#252a34;border-radius:8px;overflow:hidden;margin-top:4px}.hp{height:100%;width:100%;background:#29d46f}
-#cross{position:absolute;left:50%;top:50%;width:22px;height:22px;transform:translate(-50%,-50%);opacity:.8}
-#cross:before,#cross:after{content:"";position:absolute;background:white}.cross:before{width:22px;height:2px;top:10px}.cross:after{height:22px;width:2px;left:10px}
-#joystick{position:absolute;left:24px;bottom:30px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.10);border:2px solid rgba(255,255,255,.22);pointer-events:auto}
-#stick{position:absolute;width:58height:58px;left:34px;top:34px;border-radius:50%;background:rgba(255,255,255,.32);border:2px solid rgba(255,255,255,.5)}
+#top{position:absolute;top:12;left:12;right:12;display:flex;justify-content:space-between;align-items:flex-start}
+.panel{background:(5,8,15,.72);border:1 solid rgba255,255,255,.16);border-radius:12;padding:811;backdrop-filter:(5)}
+#hpWrap{width:150}.label{font-size:11;opacity:.75}.bar{height:10;background:#252a34;border-radius:8;overflow:hidden;margin-top:4}.hp{height:100;width:100;background:#29d46f}
+#cross{position:absolute;left:50;top:50:_width:22;height:22;transform:translate-50,-50);opacity:.8}
+#cross:before,#cross:after{content:"";position:absolute;background:white}.cross:before{width:22;height:2;top:10}.cross:after{height:22;width:2;left:10}
+#joystick{position:absolute;left:24;bottom:30;width:130;height:130;border-radius:50;background:rgba255,255,255,.10);border:2 solid rgba255,255,255,.22);pointer-events:auto}
+#stick{position:absolute;width:58:58;left:34;top:34;border-radius:50;background:rgba255,255,255,.32);border:2 solid rgba55,255,255,.5)}
 #fire{position:absolute;right:28;bottom:42;width:92;height:92;border-radius:50;border:2 solid rgba255,255,255,.45);background:rgba225,55,55,.72);color:#fff;font-weight:800;font-size:16;pointer-events:auto;box-shadow:0 5 25(0,0,0,.3)}
 #fire:active{transform:scale.94);background rgba(245,70,70,.9)}
 #tip{position:absolute;left:50;bottom:10;transform:(-50);font-size:11;opacity:.55;white-space:nowrap}
