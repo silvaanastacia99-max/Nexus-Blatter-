@@ -1,178 +1,51 @@
+<escape><!DOCTYPE html>
 
-<!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Nexus Battle</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meu Jogo 3D</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100;height:100;overflow:hidden;background:#05070b;font-family:Arial,sans-serif;touch-action:none}
-#game{position:fixed;inset:0}canvas{display:block}
-#hud{position:fixed;inset:0;pointer-events:none;color:white}
-#top{position:absolute;top:12;left:12;right:12;display:flex;justify-content:space-between;align-items:flex-start}
-.panel{background:(5,8,15,.72);border:1 solid rgba255,255,255,.16);border-radius:12;padding:811;backdrop-filter:(5)}
-#hpWrap{width:150}.label{font-size:11;opacity:.75}.bar{height:10;background:#252a34;border-radius:8;overflow:hidden;margin-top:4}.hp{height:100;width:100;background:#29d46f}
-#cross{position:absolute;left:50;top:50:_width:22;height:22;transform:translate-50,-50);opacity:.8}
-#cross:before,#cross:after{content:"";position:absolute;background:white}.cross:before{width:22;height:2;top:10}.cross:after{height:22;width:2;left:10}
-#joystick{position:absolute;left:24;bottom:30;width:130;height:130;border-radius:50;background:rgba255,255,255,.10);border:2 solid rgba255,255,255,.22);pointer-events:auto}
-#stick{position:absolute;width:58:58;left:34;top:34;border-radius:50;background:rgba255,255,255,.32);border:2 solid rgba55,255,255,.5)}
-#fire{position:absolute;right:28;bottom:42;width:92;height:92;border-radius:50;border:2 solid rgba255,255,255,.45);background:rgba225,55,55,.72);color:#fff;font-weight:800;font-size:16;pointer-events:auto;box-shadow:0 5 25(0,0,0,.3)}
-#fire:active{transform:scale.94);background rgba(245,70,70,.9)}
-#tip{position:absolute;left:50;bottom:10;transform:(-50);font-size:11;opacity:.55;white-space:nowrap}
-#msg{position:absolute;left:50;top:18;transform,(-50);font-size:28;font-weight:800;text-shadow:0 310#000;display:none}
-#start{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:(2,4,8,.72);pointer-events:auto}
-#start button{border:0;border-radius:16;padding:16 28;background:#1677ff;color:#fff;font-size:18;font-weight:800}
+*{box-sizing:border-box}
+body{margin:0;background:#101820;color:white;font-family:Arial,sans-serif;text-align:center}
+header{padding:45 15;background:linear gradient (135deg,#123b29,#167d45)}
+h1{font-size:32}
+main{padding:25 15}
+button{background:#16a34a;color:white;border:0;border-radius:10;padding:16 24;font-size:18;font-weight:bold;cursor:pointer}
+#game{display:none;margin:20 auto;max-width:500;height:300;background:linear gradient (#70c5e8 0 55,#437b37 55);border-radius:12;position:relative;overflow:hidden}
+#player{position:absolute;bottom:65;left:45;font-size:55}
+#ground{position:absolute;bottom:0;height:55;width:100;background:#555}
+#message{padding:15}
 </style>
 </head>
 <body>
-<div id="game"></div>
-<div id="hud">
-  <div id="top">
-    <div class="panel"><div class="label">NEXUS BATTLE</div><div>Inimigos: <b id="kills">0</b>/6</div></div>
-    <div class="panel" id="hpWrap"><div class="label">VIDA</div><div class="bar"><div class="hp" id="hp"></div></div></div>
-  </div>
-  <div id="cross" class="cross"></div>
-  <div id="msg"></div>
-  <div id="joystick"><div id="stick"></div></div>
-  <button id="fire">ATIRAR</button>
-  <div id="tip">Arraste o joystick para andar • toque em ATIRAR</div>
+<header>
+<h1>🔥 MEU JOGO 3D 🔥</h1>
+<p>Entre na partida e comece sua aventura!</p>
+</header>
+<main>
+<button id="enter" onclick="startGame()">CONHECER O PROJETO</button>
+<div id="game">
+<div id="player">🕹️</div>
+<div id="ground"></div>
 </div>
-<div id="start"><button id="startBtn">ENTRAR NA BATALHA</button></div>
-
-<script src="https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.min.js"></script>
+<p id="message">Toque no botão para jogar.</p>
+<button id="jump" onclick="jump()" style="display:none">PULAR</button>
+</main>
 <script>
-letscene,camera,renderer,player,gun,clock;
-letenemies=[],shots=[],enemyShots=[],health=100,kills=0,gameOver=false;
-letmove={x:0,z:0},joyId=nul,fireDown=false,lastFire=0;
-constarena=70;
-
-functionmat(c){returnnew THREE.MeshStandardMaterial({color:c,roughness:.8,metalness:.1});}
-functionbox(w,h,d,c){returnlnew THREE.Mesh(newTHREE.BoxGeometry(w,h,d),mat(c));}
-
-functionmakeChara=false){
-  constg=newTHREE.Group();
-  constbody=box(1.05,1.5,.65,color); body.position.y=1.25; g.add(body);
-  constead=newTHREE.Mesh(newTHREE.SphereGeometry(.43,16,12),mat(enemy?0xffc7a5:0xd7a07a)); head.position.y=2.35; g.add(head);
-  constleg1=box(.38,1.1,.42,0x202631),leg2=leg1.clone(); leg1.position.set(-.28,.55,0);leg2.position.set(.28,.55,0);g.add(leg1,leg2);
-  constarm1=box(.32,1.1,.38,color),arm2=arm1.clone(); arm1.position.set(-.7,1.3,0);arm2.position.set(.7,1.3,0);g.add(arm1,arm2);
-  i!enemy){
-    gun=box(.18,.18,1.2,0x20252d); gun.position.set(.63,1.25,-.62); gun.rotation.x=Math.PI/2; g.add(gun);
-  }
-  returng;
+functionstartGame(){
+document.getElementById('game').style.display='block';
+document.getElementById('enter').style.display='none';
+document.getElementById('jump').style.display='inline-block';
+document.getElementById('message').textContent='Partida iniciada! Use o botão PULAR.';
 }
-
-functioninit(){
-  scene=newTHREE.Scene();
-  scene.background=newTHREE.Color(0x080d16);
-  scene.fog=newTHREE.Fog(0x080d16,25,95);
-  camera=newTHREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,200);
-  renderer=newTHREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5)); renderer.setSize(innerWidth,innerHeight);
-  renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-  document.getElementById('game').appendChild(renderer.domElement);
-
-  consthemi=newTHREE.HemisphereLight(0x9bbcff,0x202020,2.0);scene.add(hemi);
-  constsun=newTHREE.DirectionalLight(0xffffff,2.2);sun.position.set(15,30,10);sun.castShadow=true;scene.add(sun);
-
-  constground=newTHREE.Mesh(newTHREE.PlaneGeometry(arena,arena),mat(0x1b2630));
-  ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
-
-  forleti=0;i<38;i++){
-    consts=2+Math.random()*5, h=1+Math.random()*4;
-    consto=box(s,h,s,Math.random()>.5?0x273744:0x34495a);
-    o.position.set((Math.random()-.5)*(arena-6),h/2,(Math.random()-.5)*(arena-6));
-    o.castShadow=true;o.receiveShadow=true;scene.add(o);
-  }
-
-  player=makeCharacter(0x1877ff,false);player.position.set(0,0,10);player.castShadow=true;scene.add(player);
-
-  fo(leti=0;i<6;i++){
-    conste=makeCharacter(0xd63b4c,true);
-    leta=Math.random()*Math.PI*2,r=16+Math.random()*17;
-    e.position.set(Math.cos(a)*r,0,Math.sin(a)*r-8); e.userData={hp:100,cool:0}; scene.add(e); enemies.push(e);
-  }
-  clock=newTHREE.Clock(); window.addEventListener('resize',resize); animate();
+functionjump(){
+constp=document.getElementById('player');
+p.style.bottom='150px';
+setTimeout(()=>p.style.bottom='65px',500);
 }
-
-functionresize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);}
-
-functionshoot(){
-  f(gameOver || performance.now()-lastFire<220)retur lastFire=performance.now();
-  constdir=newTHREE.Vector3(0,0,-1).applyQuaternion(player.quaternion).normalize();
-  consts=newTHREE.Mesh(newTHREE.SphereGeometry(.09,8,6),mat(0xffd24a));
-  s.position.copy(player.position).add(newTHREE.Vector3(0,1.35,0)).add(dir.clone().multiplyScalar(1));
-  s.userData={v:dir.multiplyScalar(38),life:1.2};scene.add(s);shots.push(s);
-}
-
-functionenemyFire(e){
-  constdir=newTHREE.Vector3().subVectors(player.position,e.position).normalize();
-  consts=newTHREE.Mesh(newTHREE.SphereGeometry(.1,8,6),mat(0xff4b5e));
-  s.position.copy(e.position).add(newTHREE.Vector3(0,1.3,0));
-  s.userData={v:dir.multiplyScalar(16),life:2};scene.add(s);enemyShots.push(s);
-}
-
-functiondamage(n){
-  health=Math.max(0,health-n);document.getElementById('hp').style.width=health+'%';
-  i(health<=0){gameOver=true;showMsg('DERROTA');}
-}
-functionshowMsg(t){constm=document.getElementById('msg');m.textContent=t;m.style.display='block';}
-
-functionupdate(dt){
-  f(gameOver)retur
-  constspeed=7;
-  constdx=move.x,=move.z;
-  i(Math.hypot(dx,dz)>.05){
-    player.position.x+=dx*speed*dt;player.position.z+=dz*speed*dt;
-    player.rotation.y=Math.atan2(dx,dz);
-  }
-  player.position.x=THREE.MathUtils.clamp(player.position.x,-arena/2+2,arena/2-2);
-  player.position.z=THREE.MathUtils.clamp(player.position.z,-arena/2+2,arena/2-2);
-
-  f(fireDown)shoot();
-
-  enemies.forEach(=>{
-    f(!e.visible)retur
-    constd=newTHREE.Vector3().subVectors(player.position,e.position); constdist=d.length();
-    f(dist>3){d.normalize();e.position.addScaledVector(d,1.8*dt);e.rotation.y=Math.atan2(d.x,d.z);}
-    e.userData.cool-=dt;f(dist<22&&e.userData.cool<=0){enemyFire(e);e.userData.cool=1.5+Math.random();}
-  });
-
-  shots.forEach()=>{
-    s.position.addScaledVector(s.userData.v,dt);s.userData.life-=dt;
-    fo(constof enemies)f(e.visible&&s.position.distanceTo(e.position.clone().add(newTHREE.Vector3(0,1,0)))<1){
-      e.userData.hp-=50;s.userData.life=0;
-      f(e.userData.hp<=0){e.visible=false;kills++;document.getElementById('kills').textContent=kills;f(kills===enemies.length){gameOver=true;showMsg('VITÓRIA!');}}
-      brea
-    }
-    f(s.userData.life<=0){scene.remove(s);shots.splice(i,1);}
-  });
-  enemyShots.forEach((s,i)=>{
-    s.position.addScaledVector(s.userData.v,dt);s.userData.life-=dt;
-    f(s.position.distanceTo(player.position.clone().add(newTHREE.Vector3(0,1,0)))<1){damage(8);s.userData.life=0;}
-    f(s.userData.life<=0){scene.remove(s);enemyShots.splice(i,1);}
-  });
-
-  consttarget=player.position.clone().add(newTHREE.Vector3(0,3.1,6));
-  camera.position.lerp(target,1-Math.pow(.001,dt));
-  camera.lookAt(player.position.clone().add(newTHREE.Vector3(0,1.2,0)));
-}
-
-functionanimate(){requestAnimationFrame(animate);cons=Math.min(clock.getDelta(),.05);update(dt);renderer.render(scene,camera);}
-
-constjoy=document.getElementById('joystick'),=document.getElementById('stick');
-joy.addEventListener('pointerdown',=>{joyId=e.pointerId;joy.setPointerCapture(joyId);joyMove(e);});
-joy.addEventListener('pointermove',=>{(e.pointerId===joyId)joyMove(e);});
-joy.addEventListener('pointerup',=>{(e.pointerId===joyId){joyId=nu;move.x=move.z=0;stick.style.left='34px';stick.style.top='34px';}});
-funct){
- cons r=joy.getBoundingClientRect(),=r.left+r.width/2,=r.top+r.height/2;
- letx=e.clientX-cx,y=e.clientY-cy,=48,=.;(l>max){x=x/l*max;y=y/l*max;}
- stick.style.left=(34+x)+'px';stick.style.top=(34+y)+'px';move.x=x/max;move.z=y/max;
-}
-constfire=document.getElementById('fire');
-fire.addEventListener('pointerdown',=>{fireDown=true;shoot();fire.setPointerCapture(e.pointerId);});
-fire.addEventListener('pointerup',()=>fireDown=false);fire.addEventListener('pointercancel',()=>fireDown=false);
-document.getElementById('startBtn').onclick=()=>{document.getElementById('start').style.display='none';};
-init();
 </script>
 </body>
-  </html>
+</html></escape><button onclick="document.getElementById('projeto').scrollIntoView({behavior:'smooth'})">
+    CONHECER O PROJETO
+</button>
