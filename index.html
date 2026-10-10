@@ -1,3 +1,463 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MEU JOGO 3D</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: white;
+  background: linear-gradient(#07516b, #06111e);
+  text-align: center;
+  min-height: 100vh;
+}
+.tela {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+h1 { font-size: 38px; text-shadow: 0 0 12px #00dfff; }
+button {
+  background: #00d9f5;
+  color: #001b2a;
+  border: 0;
+  border-radius: 18px;
+  padding: 20px 30px;
+  font-size: 21px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 18px;
+}
+#jogo { display: none; }
+.arena {
+  width: 100%;
+  max-width: 420px;
+  height: 300px;
+  background: linear-gradient(#2485a0 0 55%, #315c35 55% 100%);
+  border: 3px solid #00d9f5;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.personagem {
+  font-size: 65px;
+  position: absolute;
+  bottom: 35px;
+  left: 45%;
+}
+</style>
+</head>
+<body>
+
+<section id="inicio" class="tela">
+  <h1>🎮 MEU JOGO 3D</h1>
+  <p>BATALHA · SOBREVIVA · VENÇA</p>
+  <button id="entrar" type="button">ENTRAR NO JOGO</button>function entrar(){
+  <p>Jogo original de treinamento</p>
+</section>
+
+<section id="jogo" class="tela">
+  <h1>ÁREA DE TREINAMENTO</h1>
+  <div class="arena">
+    <div class="personagem">🧍</div>
+  </div>
+  <p>Você entrou no jogo!</p>
+  <button id="voltar" type="button">VOLTAR</button>
+</section>
+
+<script>
+document.getElementById("entrar").addEventListener("click", function() {
+  document.getElementById("inicio").style.display = "none";
+  document.getElementById("jogo").style.display = "flex";
+});
+
+document.getElementById("voltar").addEventListener("click", function() {
+  document.getElementById("jogo").style.display = "none";
+  document.getElementById("inicio").style.display = "flex";
+});
+</script>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEU JOGO 3D</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#82cbe5;color:white}
+button{background:#00d9f5;color:#07131b;border:0;padding:13px 20px;
+font-size:17px;font-weight:bold;border-radius:4px;cursor:pointer}
+#inicio{height:100dvh;display:flex;flex-direction:column;
+justify-content:center;align-items:center;text-align:center;padding:15px}
+h1{font-size:40px}
+#jogo{display:none;height:100dvh;background:#86c9df;position:relative;overflow:hidden}
+#ceu{position:absolute;inset:0 0 40% 0;background:linear-gradient(#63b9eb,#d2efff)}
+#chao{position:absolute;bottom:0;width:100%;height:55%;background:#548c43}
+#estrada{position:absolute;bottom:0;left:30%;width:40%;height:60%;
+background:#777;border-left:5px solid #ddd;border-right:5px solid #ddd;
+clip-path:polygon(40% 0,60% 0,100% 100%,0 100%)}
+#boneco{position:absolute;bottom:24%;left:50%;transform:translateX(-50%);
+width:55px;height:110px}
+#cabeca{width:34px;height:34px;background:#e9b18b;border-radius:50%;
+margin:auto;border:3px solid #252525}
+#corpo{height:42px;width:45px;margin:auto;background:#263c54;border-radius:8px}
+#pernas{display:flex;justify-content:center;gap:7px}
+#pernas span{height:34px;width:15px;background:#222}
+#hud{position:absolute;top:15px;left:12px;right:12px;
+display:flex;justify-content:space-between;align-items:center;gap:8px}
+#controles{position:absolute;bottom:18px;left:0;right:0;
+display:flex;justify-content:space-around;align-items:center}
+#mensagem{position:absolute;top:75px;width:100%;text-align:center;
+color:#14212b;font-weight:bold}
+</style>
+</head>
+<body>
+
+<div id="inicio">
+<h1>MEU JOGO 3D</h1>
+<p>BATALHA • SOBREVIVA • VENÇA</p>
+<button onclick="entrar()">ENTRAR NO JOGO</button>
+<p>Jogo original de treinamento</p>
+</div>
+
+<div id="jogo">
+<div id="ceu"></div>
+<div id="chao"></div>
+<div id="estrada"></div>
+<div id="hud">
+<button onclick="voltar()">VOLTAR</button>
+<strong>MEU JOGO 3D</strong>
+</div>
+<div id="mensagem">TREINAMENTO INICIADO!</div>
+<div id="boneco">
+<div id="cabeca"></div>
+<div id="corpo"></div>
+<div id="pernas"><span></span><span></span></div>
+</div>
+<div id="controles">
+<button onclick="mover(-25,0)">◀</button>
+<button onclick="mover(0,-20)">▲</button>
+<button onclick="mover(0,20)">▼</button>
+<button onclick="mover(25,0)">▶</button>
+<button onclick="acao()">AÇÃO</button>
+</div>
+</div>
+
+<script>
+function entrar(){
+ document.getElementById('inicio').style.display='none';
+ document.getElementById('jogo').style.display='block';
+}
+function voltar(){
+ document.getElementById('jogo').style.display='none';
+ document.getElementById('inicio').style.display='flex';
+}
+let x=0,y=0;
+function mover(dx,dy){
+ x=Math.max(-120,Math.min(120,x+dx));
+ y=Math.max(-60,Math.min(60,y+dy));
+ document.getElementById('boneco').style.transform=
+ 'translate(calc(-50% + '+x+'px), '+y+'px)';
+}
+function acao(){
+ document.getElementById('mensagem').textContent='AÇÃO REALIZADA!';
+}
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEU JOGO 3D</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;overflow:hidden;background:#87ceeb;font-family:Arial}
+#info{position:fixed;top:12px;left:12px;color:white;
+background:#0008;padding:12px;border-radius:10px;z-index:2}
+#controls{position:fixed;bottom:20px;left:20px;z-index:3;
+display:grid;grid-template-columns:55px 55px 55px;gap:5px}
+button{border:0;border-radius:12px;background:#00d9ef;
+color:#003344;font-weight:bold;font-size:20px;min-height:52px;
+touch-action:none}
+#up{grid-column:2}
+#left{grid-column:1;grid-row:2}
+#down{grid-column:2;grid-row:2}
+#right{grid-column:3;grid-row:2}
+#jump{position:fixed;right:20px;bottom:35px;width:85px;
+height:65px;z-index:3;font-size:15px}
+#loading{position:fixed;inset:0;display:grid;place-items:center;
+color:white;background:#197d91;font-size:22px;z-index:5}
+</style>
+</head>
+<body>
+<div id="loading">Carregando mapa 3D...</div>
+<div id="info">MEU JOGO 3D<br>Área de treinamento<br>
+Explore o mapa!</div>
+<div id="controls">
+<button id="up">▲</button>
+<button id="left">◀</button>
+<button id="down">▼</button>
+<button id="right">▶</button>
+</div>
+<button id="jump">PULAR</button>
+
+<script type="module">
+import * as THREE from
+'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js';
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb);
+scene.fog = new THREE.Fog(0x87ceeb, 100, 260);
+
+const camera = new THREE.PerspectiveCamera(
+70, innerWidth/innerHeight, 0.1, 500
+);
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x45623a,2));
+const sun = new THREE.DirectionalLight(0xffffff,2);
+sun.position.set(40,70,30);
+sun.castShadow = true;
+scene.add(sun);
+
+function material(color){
+ return new THREE.MeshStandardMaterial({color});
+}
+function box(x,y,z,w,h,d,color){
+ const obj = new THREE.Mesh(
+  new THREE.BoxGeometry(w,h,d),material(color)
+ );
+ obj.position.set(x,y,z);
+ obj.castShadow = true;
+ obj.receiveShadow = true;
+ scene.add(obj);
+ return obj;
+}
+
+// TERRENO GRANDE
+const ground = new THREE.Mesh(
+ new THREE.PlaneGeometry(300,300),
+ material(0x477d37)
+);
+ground.rotation.x = -Math.PI/2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// CAMINHO DE TERRA
+const road = new THREE.Mesh(
+ new THREE.PlaneGeometry(16,220),
+ material(0xbca477)
+);
+road.rotation.x = -Math.PI/2;
+road.position.set(0,0.025,0);
+scene.add(road);
+
+// MONTANHAS AO REDOR
+for(let i=0;i<18;i++){
+ const a=i*Math.PI*2/18;
+ const r=125;
+ const mountain = new THREE.Mesh(
+  new THREE.ConeGeometry(12+Math.random()*12,
+   22+Math.random()*35,5),
+  material(i%2?0x68796b:0x718b70)
+ );
+ mountain.position.set(
+  Math.cos(a)*r,12,Math.sin(a)*r
+ );
+ mountain.castShadow=true;
+ scene.add(mountain);
+}
+
+// ÁRVORES
+function tree(x,z,s=1){
+ const trunk = new THREE.Mesh(
+  new THREE.CylinderGeometry(.45*s,.7*s,4*s,7),
+  material(0x704626)
+ );
+ trunk.position.set(x,2*s,z);
+ trunk.castShadow=true;
+ scene.add(trunk);
+ for(let i=0;i<3;i++){
+  const leaves = new THREE.Mesh(
+   new THREE.ConeGeometry((3-i*.45)*s,5*s,7),
+   material(i===1?0x23813a:0x17652c)
+  );
+  leaves.position.set(x,(4.5+i*2)*s,z);
+  leaves.castShadow=true;
+  scene.add(leaves);
+ }
+}
+for(let i=0;i<100;i++){
+ let x=(Math.random()-.5)*270;
+ let z=(Math.random()-.5)*270;
+ if(Math.abs(x)<14 && Math.abs(z)<100) continue;
+ tree(x,z,.7+Math.random()*.8);
+}
+
+// CASAS
+function house(x,z,color){
+ box(x,2,z,10,4,9,color);
+ const roof = new THREE.Mesh(
+  new THREE.ConeGeometry(7.5,4,4),
+  material(0x793b2a)
+ );
+ roof.position.set(x,6,z);
+ roof.rotation.y=Math.PI/4;
+ roof.castShadow=true;
+ scene.add(roof);
+ box(x,1,z+4.56,1.6,2.2,.15,0x38251b);
+ box(x-2.7,2.5,z+4.6,1.8,1.4,.15,0x8ee5ff);
+ box(x+2.7,2.5,z+4.6,1.8,1.4,.15,0x8ee5ff);
+}
+house(-27,-28,0xd6bd8d);
+house(29,-48,0xc4c6cc);
+house(-35,25,0xd9a16d);
+house(34,30,0xd5d3b5);
+
+// OBSTÁCULOS E CAIXAS
+for(let i=0;i<22;i++){
+ box((Math.random()-.5)*100,1,
+ (Math.random()-.5)*100,2,2,2,0x967044);
+}
+
+// PERSONAGEM ORIGINAL SIMPLES
+const player = new THREE.Group();
+const shirt = new THREE.Mesh(
+ new THREE.CylinderGeometry(.65,.8,1.8,10),
+ material(0xff7518)
+);
+shirt.position.y=2.3;
+shirt.castShadow=true;
+player.add(shirt);
+
+const head = new THREE.Mesh(
+ new THREE.SphereGeometry(.58,12,12),
+ material(0xffc58b)
+);
+head.position.y=3.65;
+player.add(head);
+
+const hair = new THREE.Mesh(
+ new THREE.SphereGeometry(.6,12,8,0,Math.PI*2,0,Math.PI/2),
+ material(0x493026)
+);
+hair.position.y=3.9;
+player.add(hair);
+
+for(const side of [-1,1]){
+ const leg = new THREE.Mesh(
+  new THREE.BoxGeometry(.42,1.2,.5),
+  material(0x354c86)
+ );
+ leg.position.set(side*.32,.9,0);
+ player.add(leg);
+ const arm = new THREE.Mesh(
+  new THREE.BoxGeometry(.3,1.25,.35),
+  material(0xffc58b)
+ );
+ arm.position.set(side*.85,2.25,0);
+ player.add(arm);
+}
+player.position.set(0,0,8);
+scene.add(player);
+
+// CONTROLES
+const keys={};
+addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true);
+addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+addEventListener('blur',()=>Object.keys(keys).forEach(k=>keys[k]=false));
+
+for(const [id,key] of [
+ ['up','w'],['down','s'],['left','a'],['right','d']
+]){
+ const btn=document.getElementById(id);
+ btn.addEventListener('pointerdown',e=>{
+  e.preventDefault();keys[key]=true;
+ });
+ for(const event of ['pointerup','pointercancel','pointerleave']){
+  btn.addEventListener(event,()=>keys[key]=false);
+ }
+}
+
+let jumping=false, velocityY=0;
+document.getElementById('jump').addEventListener('pointerdown',()=>{
+ if(!jumping){velocityY=8;jumping=true;}
+});
+
+const clock = new THREE.Clock();
+const direction = new THREE.Vector3();
+
+function animate(){
+ requestAnimationFrame(animate);
+ const dt=Math.min(clock.getDelta(),.05);
+
+ direction.set(0,0,0);
+ if(keys.w||keys.arrowup) direction.z-=1;
+ if(keys.s||keys.arrowdown) direction.z+=1;
+ if(keys.a||keys.arrowleft) direction.x-=1;
+ if(keys.d||keys.arrowright) direction.x+=1;
+
+ if(direction.length()>0){
+  direction.normalize();
+  player.position.x+=direction.x*12*dt;
+  player.position.z+=direction.z*12*dt;
+  player.rotation.y=Math.atan2(direction.x,direction.z);
+ }
+
+ // LIMITES DO MAPA
+ player.position.x=THREE.MathUtils.clamp(player.position.x,-140,140);
+ player.position.z=THREE.MathUtils.clamp(player.position.z,-140,140);
+
+ if(jumping){
+  player.position.y+=velocityY*dt;
+  velocityY-=20*dt;
+  if(player.position.y<=0){
+   player.position.y=0;
+   jumping=false;
+   velocityY=0;
+  }
+ }
+
+ // CÂMERA SEGUE O PERSONAGEM
+ const offset=new THREE.Vector3(0,8,13);
+ offset.applyAxisAngle(new THREE.Vector3(0,1,0),player.rotation.y);
+ const target=player.position.clone().add(offset);
+ camera.position.lerp(target,Math.min(1,5*dt));
+ camera.lookAt(
+  player.position.x,player.position.y+2,player.position.z
+ );
+
+ renderer.render(scene,camera);
+}
+animate();
+document.getElementById('loading').style.display='none';
+
+addEventListener('resize',()=>{
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+</html>
+
 
 
 <!DOCTYPE html>
