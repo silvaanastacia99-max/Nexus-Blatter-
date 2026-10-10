@@ -1,51 +1,341 @@
-<escape><!DOCTYPE html>
-
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Meu Jogo 3D</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#101820;color:white;font-family:Arial,sans-serif;text-align:center}
-header{padding:45 15;background:linear gradient (135deg,#123b29,#167d45)}
-h1{font-size:32}
-main{padding:25 15}
-button{background:#16a34a;color:white;border:0;border-radius:10;padding:16 24;font-size:18;font-weight:bold;cursor:pointer}
-#game{display:none;margin:20 auto;max-width:500;height:300;background:linear gradient (#70c5e8 0 55,#437b37 55);border-radius:12;position:relative;overflow:hidden}
-#player{position:absolute;bottom:65;left:45;font-size:55}
-#ground{position:absolute;bottom:0;height:55;width:100;background:#555}
-#message{padding:15}
+* { box-sizing: border-box; }
+body {
+  margin: 0; overflow: hidden; background: #87ceeb;
+  font-family: Arial, sans-serif; color: white;
+  touch-action: none;
+}
+canvas { display: block; }
+#menu, #fim {
+  position: fixed; inset: 0; z-index: 5;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  text-align: center;
+  background: linear gradient (#143c57aa,#06121eee);
+}
+h1 { font-size: clamp (32,8,60); text-shadow: 0 312 #00cfff; }
+button {
+  background: #00d9ff; color: #061820; border: 0;
+  border-radius: 12; padding: 14 22;
+  font-size: 17; font-weight: bold; margin: 7;
+}
+#hud { display:none; position:fixed; inset:0; pointer-events:none; }
+#stats { position:absolute; top:12; left:12;
+  background:#0009; padding:10; border-radius:8; line-height:1.7; }
+#pause { position:absolute; top:12; right:12; pointer-events:auto; }
+#stick {
+  position:absolute; bottom:25; left:22; width:115; height:115;
+  border:2 solid #ffffff99; border-radius:50; background:#0005;
+  pointer-events:auto; touch-action:none;
+}
+#knob { position:absolute; width:45; height:45; left:33; top:33;
+  border-radius:50; background:#ffffffaa; }
+#actions { position:absolute; right:18; bottom:25;
+  display:flex; flex-direction:column; align-items:center; pointer-events:auto; }
+#actions button { width:90; padding:15 4; border-radius:50; }
+#hint { position:absolute; bottom:150; left:0; right:0;
+  text-align:center; text-shadow:0 2 5 black; }
+#fim { display:none; }
 </style>
 </head>
 <body>
-<header>
-<h1>🔥 MEU JOGO 3D 🔥</h1>
-<p>Entre na partida e comece sua aventura!</p>
-</header>
-<main>
-<button id="enter" onclick="startGame()">CONHECER O PROJETO</button>
-<div id="game">
-<div id="player">🕹️</div>
-<div id="ground"></div>
+
+<div id="menu">
+  <h1>MEU JOGO 3D</h1>
+  <p>BATALHA • SOBREVIVA • VENÇA</p>
+  <button id="entrar">ENTRAR NO JOGO</button>
+  <p>Jogo original de treinamento 3D</p>
 </div>
-<p id="message">Toque no botão para jogar.</p>
-<button id="jump" onclick="jump()" style="display:none">PULAR</button>
-</main>
+
+<div id="hud">
+  <div id="stats">❤️ Vida: <span id="vida">100</span><br>
+  🎯 Alvos: <span id="alvos">0</span></div>
+  <button id="pause">Ⅱ PAUSAR</button>
+  <div id="hint">Use o controle para andar e mire nos alvos!</div>
+  <div id="stick"><div id="knob"></div></div>
+  <div id="actions">
+    <button id="pular">PULAR</button>
+    <button id="atirar">ATIRAR</button>
+  </div>
+</div>
+
+<div id="fim">
+  <h1 id="tituloFim">PAUSADO</h1>
+  <p id="textoFim">Continue sua partida.</p>
+  <button id="continuar">CONTINUAR</button>
+  <button id="menuBtn">VOLTAR AO MENU</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
-functionstartGame(){
-document.getElementById('game').style.display='block';
-document.getElementById('enter').style.display='none';
-document.getElementById('jump').style.display='inline-block';
-document.getElementById('message').textContent='Partida iniciada! Use o botão PULAR.';
+let scene, camera, renderer, player, clock;
+let enemies = [], keys = {};
+let running = false, paused = false;
+let health = 100, hits = 0, jump = 0, vy = 0;
+let joyX = 0, joyY = 0, yaw = 0;
+let groundY = 0;
+
+const menu = document.getElementById('menu');
+const hud = document.getElementById('hud');
+const fim = document.getElementById('fim');
+
+function startGame() {
+  menu.style.display = 'none';
+  fim.style.display = 'none';
+  hud.style.display = 'block';
+
+  if (!renderer) setup();
+  health = 100; hits = 0;
+  document.getElementById('vida').textContent = health;
+  document.getElementById('alvos').textContent = hits;
+  player.position.set(0, 0, 5);
+  enemies.forEach(e => scene.remove(e));
+  enemies = [];
+  for (let i = 0; i < 7; i++) makeEnemy();
+  paused = false; running = true;
+  clock.start();
+  renderer.setAnimationLoop(loop);
 }
-functionjump(){0a490728955a0e00319d22d3e0fcde9f8a364ac3
-constp=document.getElementById('player');
-p.style.bottom='150px';
-setTimeout(()=>p.style.bottom='65px',500);
+
+function setup() {
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x87ceeb);
+  scene.fog = new THREE.Fog(0x87ceeb, 35, 100);
+
+  camera = new THREE.PerspectiveCamera(
+    70, innerWidth / innerHeight, 0.1, 300
+  );
+  renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.7));
+  renderer.shadowMap.enabled = true;
+  document.body.appendChild(renderer.domElement);
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x526844, 2));
+  const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+  sun.position.set(15, 25, 10);
+  sun.castShadow = true;
+  scene.add(sun);
+
+  const field = new THREE.Mesh(
+    new THREE.PlaneGeometry(200,200),
+    new THREE.MeshStandardMaterial({color:0x579447})
+  );
+  field.rotation.x = -Math.PI/2;
+  field.receiveShadow = true;
+  scene.add(field);
+
+  // Estrada
+  const road = new THREE.Mesh(
+    new THREE.PlaneGeometry(12,150),
+    new THREE.MeshStandardMaterial({color:0x777777})
+  );
+  road.rotation.x = -Math.PI/2;
+  road.position.set(10,0.02,0);
+  scene.add(road);
+
+  // Casas e árvores
+  for(let i=0;i<24;i++){
+    const x = (Math.random()<.5?-1:1)*(8+Math.random()*20);
+    const z = (Math.random()-.5)*100;
+    if(i%2===0){
+      const trunk = new THREE.Mesh(
+        new THREE.CylinderGeometry(.18,.28,1.5,7),
+        new THREE.MeshStandardMaterial({color:0x684328})
+      );
+      trunk.position.set(x,.75,z); scene.add(trunk);
+      const crown = new THREE.Mesh(
+        new THREE.SphereGeometry(1.4,8,7),
+        new THREE.MeshStandardMaterial({color:0x27743b})
+      );
+      crown.position.set(x,2,z); scene.add(crown);
+    } else {
+      const house = new THREE.Mesh(
+        new THREE.BoxGeometry(3,2.5,3),
+        new THREE.MeshStandardMaterial({
+          color:[0xb65d40,0xd2bd8b,0x758eaa][i%3]
+        })
+      );
+      house.position.set(x,1.25,z); scene.add(house);
+      const roof = new THREE.Mesh(
+        new THREE.ConeGeometry(2.5,1.4,4),
+        new THREE.MeshStandardMaterial({color:0x59453b})
+      );
+      roof.position.set(x,3.15,z);
+      roof.rotation.y=Math.PI/4; scene.add(roof);
+    }
+  }
+
+  // Personagem original simples
+  player = new THREE.Group();
+  const body = new THREE.Mesh(
+    new THREE.CapsuleGeometry(.38,.8,4,8),
+    new THREE.MeshStandardMaterial({color:0x174b88})
+  );
+  body.position.y=1.05; player.add(body);
+  const head = new THREE.Mesh(
+    new THREE.SphereGeometry(.28,12,10),
+    new THREE.MeshStandardMaterial({color:0xc98e63})
+  );
+  head.position.y=1.8; player.add(head);
+  const backpack = new THREE.Mesh(
+    new THREE.BoxGeometry(.45,.55,.25),
+    new THREE.MeshStandardMaterial({color:0x292d31})
+  );
+  backpack.position.set(0,1.1,.42); player.add(backpack);
+  scene.add(player);
+
+  clock = new THREE.Clock();
+  window.addEventListener('resize', resize);
+}
+
+function makeEnemy(){
+  const enemy = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({color:0xa72e36});
+  const body = new THREE.Mesh(
+    new THREE.CapsuleGeometry(.38,.75,4,8), mat
+  );
+  body.position.y=1; enemy.add(body);
+  consthead = newTHREE.Mesh(
+    newTHREE.SphereGeometry(.27,10,8),
+    newTHREE.MeshStandardMaterial({color:0xc98e63})
+  );
+  head.position.y=1.7; enemy.add(head);
+  enemy.position.set((Math.random()-.5)*28,0,-8-Math.random()*35);
+  scene.add(enemy); enemies.push(enemy);
+}
+
+functionshoot(){
+  i!running || paused)retur
+  // Mira no alvo mais próximo que estiver à frente
+  lettarget = nul, best = 0.94;
+  constforward = newTHREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
+  enemies.forEach(e>{
+    constdir = e.position.clone().sub(player.position);
+    constdist = dir.length();
+    dir.y=0; dir.normalize();
+    constdot = dir.dot(forward);
+    ifdot>best && dist<32){best=dot;target=e;}
+  });
+  iftarget){
+    scene.remove(target);
+    enemies=enemies.filter(e=>e!==target);
+    hits++;
+    document.getElementById('alvos').textContent=hits;
+    ifenemies.length===0)
+    forlet i=0;i<7;i++) makeEnemy();
+  }
+}
+
+functionloop(){
+  ifrunning || pausedreturn;
+  constdt=Math.min(clock.getDelta(),.05);
+  constforward = (keys['w']||keys['ArrowUp']?-1:0)
+                + (keys['s']||keys['ArrowDown']?1:0) + joyY;
+  constside = (keys['d']||keys['ArrowRight']?1:0)
+             - (keys['a']||keys['ArrowLeft']?1:0) + joyX;
+  constspeed=7*dt;
+  player.position.x += (side*Math.cos(yaw)+forward*Math.sin(yaw))*speed;
+  player.position.z += (-forward*Math.cos(yaw)+side*Math.sin(yaw))*speed;
+  player.position.x=THREE.MathUtils.clamp(player.position.x,-45,45);
+  player.position.z=THREE.MathUtils.clamp(player.position.z,-65,65);
+
+  vy-=18*dt; jump+=vy*dt;
+  ifjump<0){jump=0;vy=0;}
+  player.position.y=jump;
+  player.rotation.y=yaw;
+
+  // Câmera acompanha o personagem
+  constdesired = newTHREE.Vector3(
+    player.position.x+Math.sin(yaw)*5,
+    player.position.y+4,
+    player.position.z+Math.cos(yaw)*7
+  );
+  camera.position.lerp(desired,.12);
+  camera.lookAt(player.position.x,player.position.y+1.1,player.position.z-2);
+
+  enemies.forEach(=>{
+    e.lookAt(player.position.x,0,player.position.z);
+  });
+  renderer.render(scene,camera);
+}
+
+functionresize(){
+  i!camera||!renderer)retur
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+}
+
+document.getElementById('entrar').onclick=startGame;
+document.getElementById('atirar').onclick=shoot;
+document.getElementById('pular').onclick=()=>{
+  ifrunning&&!paused&&jump===0)vy=7;
+};
+document.getElementById('pause').onclick=()=>{
+  i!running)retur
+  paused=true;
+  document.getElementById('tituloFim').textContent='PAUSADO';
+  document.getElementById('textoFim').textContent='Sua partida está pausada.';
+  document.getElementById('continuar').style.display='inline-block';
+  fim.style.display='flex';
+};
+document.getElementById('continuar').onclick=()=>{
+  fim.style.display='none'; paused=false; clock.start();
+};
+document.getElementById('menuBtn').onclick=()=>{
+  running=false; paused=false;
+  hud.style.display='none'; fim.style.display='none';
+  menu.style.display='flex';
+};
+
+window.addEventListener('keydown',e>{keys[e.key]=true;});
+window.addEventListener('keyup',e>{keys[e.key]=false;});
+
+conststick=document.getElementById('stick');
+constknob=document.getElementById('knob');
+letpointer=nul;
+stick.addEventListener('pointerdown',e>{
+  pointer=e.pointerId; stick.setPointerCapture(pointer); moveStick(e);
+});
+stick.addEventListener('pointermove',e>{ife.pointerId===pointer)moveStick(e);});
+functionmoveStick(e){
+  constr=stick.getBoundingClientRect();
+  letx=e.clientX-(r.left+r.width/2);
+  lety=e.clientY-(r.top+r.height/2);
+  constlen=Math.hypot(x,y),=35;
+  iflen>max){x=x/len*max;y=y/len*max;}
+  knob.style.transform=`translate(${x}px,${y}px)`;
+  joyX=x/max; joyY=y/max;
+}
+functionreleaseStick(){
+pointer=nul;joyX=0;joyY=0;knob.style.transform='';
+}
+stick.addEventListener('pointerup',releaseStick);
+stick.addEventListener('pointercancel',releaseStick);
+
+// Arrastar o lado direito da tela gira a câmera
+letlastX=nul
+rendererlessTouch();
+functionrendererlessTouch(){
+  window.addEventListener('touchstart',e>{
+    ife.touches[0].clientX>innerWidth*.45)
+      lastX=e.touches[0].clientX;
+  },{passive:true});
+  window.addEventListener('touchmove',e>{
+    iflastX!==nul&& e.touches[0].clientX>innerWidth*.45){
+      yaw-=(e.touches[0].clientX-lastX)*.008;
+      lastX=e.touches[0].clientX;
+    }
+  },{passive:true});
+  window.addEventListener('touchend',()=>lastX=nul,{passive:true});
 }
 </script>
 </body>
-</html></escape><button onclick="document.getElementById('projeto').scrollIntoView({behavior:'smooth'})">
-    CONHECER O PROJETO
-</button>
+</html>
