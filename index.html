@@ -1,4 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MEU JOGO 3D</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: white;
+  background: linear-gradient(#07516b, #06111e);
+  text-align: center;
+  min-height: 100vh;
+}
+.tela {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+h1 { font-size: 38px; text-shadow: 0 0 12px #00dfff; }
+button {
+  background: #00d9f5;
+  color: #001b2a;
+  border: 0;
+  border-radius: 18px;
+  padding: 20px 30px;
+  font-size: 21px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 18px;
+}
+#jogo { display: none; }
+.arena {
+  width: 100%;
+  max-width: 420px;
+  height: 300px;
+  background: linear-gradient(#2485a0 0 55%, #315c35 55% 100%);
+  border: 3px solid #00d9f5;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.personagem {
+  font-size: 65px;
+  position: absolute;
+  bottom: 35px;
+  left: 45%;
+}
+</style>
+</head>
+<body>
 
+<section id="inicio" class="tela">
+  <h1>🎮 MEU JOGO 3D</h1>
+  <p>BATALHA · SOBREVIVA · VENÇA</p>
+  <button id="entrar" type="button">ENTRAR NO JOGO</button>function entrar(){
+  <p>Jogo original de treinamento</p>
+</section>
+
+<section id="jogo" class="tela">
+  <h1>ÁREA DE TREINAMENTO</h1>
+  <div class="arena">
+    <div class="personagem">🧍</div>
+  </div>
+  <p>Você entrou no jogo!</p>
+  <button id="voltar" type="button">VOLTAR</button>
+</section>
+
+<script>
+document.getElementById("entrar").addEventListener("click", function() {
+  document.getElementById("inicio").style.display = "none";
+  document.getElementById("jogo").style.display = "flex";
+});
+
+document.getElementById("voltar").addEventListener("click", function() {
+  document.getElementById("jogo").style.display = "none";
+  document.getElementById("inicio").style.display = "flex";
+});
+</script>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEU JOGO 3D</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#82cbe5;color:white}
+button{background:#00d9f5;color:#07131b;border:0;padding:13px 20px;
+font-size:17px;font-weight:bold;border-radius:4px;cursor:pointer}
+#inicio{height:100dvh;display:flex;flex-direction:column;
+justify-content:center;align-items:center;text-align:center;padding:15px}
+h1{font-size:40px}
+#jogo{display:none;height:100dvh;background:#86c9df;position:relative;overflow:hidden}
+#ceu{position:absolute;inset:0 0 40% 0;background:linear-gradient(#63b9eb,#d2efff)}
+#chao{position:absolute;bottom:0;width:100%;height:55%;background:#548c43}
+#estrada{position:absolute;bottom:0;left:30%;width:40%;height:60%;
+background:#777;border-left:5px solid #ddd;border-right:5px solid #ddd;
+clip-path:polygon(40% 0,60% 0,100% 100%,0 100%)}
+#boneco{position:absolute;bottom:24%;left:50%;transform:translateX(-50%);
+width:55px;height:110px}
+#cabeca{width:34px;height:34px;background:#e9b18b;border-radius:50%;
+margin:auto;border:3px solid #252525}
+#corpo{height:42px;width:45px;margin:auto;background:#263c54;border-radius:8px}
+#pernas{display:flex;justify-content:center;gap:7px}
+#pernas span{height:34px;width:15px;background:#222}
+#hud{position:absolute;top:15px;left:12px;right:12px;
+display:flex;justify-content:space-between;align-items:center;gap:8px}
+#controles{position:absolute;bottom:18px;left:0;right:0;
+display:flex;justify-content:space-around;align-items:center}
+#mensagem{position:absolute;top:75px;width:100%;text-align:center;
+color:#14212b;font-weight:bold}
+</style>
+</head>
+<body>
+
+<div id="inicio">
+<h1>MEU JOGO 3D</h1>
+<p>BATALHA • SOBREVIVA • VENÇA</p>
+<button onclick="entrar()">ENTRAR NO JOGO</button>
+<p>Jogo original de treinamento</p>
+</div>
+
+<div id="jogo">
+<div id="ceu"></div>
+<div id="chao"></div>
+<div id="estrada"></div>
+<div id="hud">
+<button onclick="voltar()">VOLTAR</button>
+<strong>MEU JOGO 3D</strong>
+</div>
+<div id="mensagem">TREINAMENTO INICIADO!</div>
+<div id="boneco">
+<div id="cabeca"></div>
+<div id="corpo"></div>
+<div id="pernas"><span></span><span></span></div>
+</div>
+<div id="controles">
+<button onclick="mover(-25,0)">◀</button>
+<button onclick="mover(0,-20)">▲</button>
+<button onclick="mover(0,20)">▼</button>
+<button onclick="mover(25,0)">▶</button>
+<button onclick="acao()">AÇÃO</button>
+</div>
+</div>
+
+<script>
+function entrar(){
+ document.getElementById('inicio').style.display='none';
+ document.getElementById('jogo').style.display='block';
+}
+function voltar(){
+ document.getElementById('jogo').style.display='none';
+ document.getElementById('inicio').style.display='flex';
+}
+let x=0,y=0;
+function mover(dx,dy){
+ x=Math.max(-120,Math.min(120,x+dx));
+ y=Math.max(-60,Math.min(60,y+dy));
+ document.getElementById('boneco').style.transform=
+ 'translate(calc(-50% + '+x+'px), '+y+'px)';
+}
+function acao(){
+ document.getElementById('mensagem').textContent='AÇÃO REALIZADA!';
+}
+</script>
+</body>
+</html>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
