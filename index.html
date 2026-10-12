@@ -279,6 +279,79 @@ addEventListener('resize',()=>{
  renderer.setSize(innerWidth,innerHeight);
 });
 </script>
+/* INIMIGOS 3D - MEU JOGO 3D */
+const inimigos3D = [];
+
+function criarInimigo3D(x, z) {
+  const inimigo = new THREE.Group();
+
+  const materialCorpo = new THREE.MeshStandardMaterial({
+    color: 0xc62828
+  });
+  const materialPele = new THREE.MeshStandardMaterial({
+    color: 0xe5b18a
+  });
+  const materialCalca = new THREE.MeshStandardMaterial({
+    color: 0x263b70
+  });
+
+  function parte(w, h, d, material, px, py, pz) {
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(w, h, d),
+      material
+    );
+    mesh.position.set(px, py, pz);
+    inimigo.add(mesh);
+  }
+
+  // Corpo, cabeça, braços e pernas
+  parte(0.8, 1.1, 0.4, materialCorpo, 0, 1.35, 0);
+
+  const cabeca = new THREE.Mesh(
+    new THREE.SphereGeometry(0.3, 12, 10),
+    materialPele
+  );
+  cabeca.position.y = 2.15;
+  inimigo.add(cabeca);
+
+  parte(0.22, 0.85, 0.25, materialCorpo, -0.55, 1.35, 0);
+  parte(0.22, 0.85, 0.25, materialCorpo,  0.55, 1.35, 0);
+  parte(0.28, 0.8, 0.3, materialCalca, -0.22, 0.4, 0);
+  parte(0.28, 0.8, 0.3, materialCalca,  0.22, 0.4, 0);
+
+  inimigo.position.set(x, 0, z);
+  inimigo.userData.vida = 3;
+
+  scene.add(inimigo);
+  inimigos3D.push(inimigo);
+}
+
+// Criar três inimigos no mapa
+criarInimigo3D(5, -8);
+criarInimigo3D(-6, -12);
+criarInimigo3D(10, -16);
+
+// Aproximar os inimigos do jogador
+// A movimentação começa somente se existir o jogador.
+const intervaloInimigos3D = setInterval(() => {
+  if (typeof player === "undefined" || !player.position) return;
+
+  inimigos3D.forEach(inimigo => {
+    if (inimigo.userData.vida <= 0) return;
+
+    const dx = player.position.x - inimigo.position.x;
+    const dz = player.position.z - inimigo.position.z;
+    const distancia = Math.hypot(dx, dz);
+
+    if (distancia > 2.2 && distancia < 35) {
+      inimigo.position.x += dx / distancia * 0.025;
+      inimigo.position.z += dz / distancia * 0.025;
+    }
+
+    inimigo.rotation.y = Math.atan2(dx, dz);
+  });
+}, 50);
+     
 </body>
 </html>
 
