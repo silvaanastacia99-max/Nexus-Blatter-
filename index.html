@@ -335,19 +335,7 @@ function animate(){
  const target=player.position.clone().add(offset);
  camera.position.lerp(target,Math.min(1,5*dt));
  camera.lookAt(
-  player.position.x,player.position.y+2,player.position.z
- );
-
- renderer.render(scene,camera);
-}
-animate();
-document.getElementById('loading').style.display='none';
-
-addEventListener('resize',()=>{
- camera.aspect=innerWidth/innerHeight;
- camera.updateProjectionMatrix();
- renderer.setSize(innerWidth,innerHeight);
-});
+  player.position.x,player.position.y+2,player.position
 </script
 </body>
 </html>
