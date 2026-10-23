@@ -7,280 +7,333 @@
 <title>MEU JOGO 3D</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#152c25;color:white;font-family:Arial,sans-serif;touch-action:none}
+body{margin:0;overflow:hidden;background:#101c25;font-family:Arial;color:white;touch-action:none}
 canvas{display:block;width:100vw;height:100dvh}
-#hud{position:fixed;top:10px;left:10px;right:10px;z-index:2;display:flex;justify-content:space-between;gap:8px;pointer-events:none}
-.painel{background:#071b20dd;border:1px solid #4de5e5;border-radius:12px;padding:9px;font-size:13px}
-#vidaFundo{width:105px;height:9px;background:#522; border-radius:8px;margin-top:5px;overflow:hidden}
-#vidaBarra{height:100%;width:100%;background:#42ed71}
-#mensagem{position:fixed;top:83px;left:50%;transform:translateX(-50%);z-index:3;background:#071b20cc;border-radius:10px;padding:8px 12px;font-size:13px;text-align:center;white-space:nowrap}
-#controles{position:fixed;bottom:18px;left:15px;right:15px;display:flex;justify-content:space-between;align-items:end;z-index:4}
-#setas{display:grid;grid-template-columns:53px 53px 53px;grid-template-rows:53px 53px;gap:5px}
-button{border:1px solid #75f5ff;background:#092d39dd;color:white;border-radius:14px;font-size:23px;font-weight:bold;touch-action:none;user-select:none;-webkit-user-select:none}
-button:active{background:#087b8b}
-.vazio{visibility:hidden}
-#atacar{width:92px;height:92px;border-radius:50%;background:#b52b24e8;border:3px solid #ffb3a0;font-size:15px}
-#centro{grid-column:2;grid-row:1}
-#esquerda{grid-column:1;grid-row:2}
-#baixo{grid-column:2;grid-row:2}
-#direita{grid-column:3;grid-row:2}
-#inicio{position:fixed;inset:0;z-index:10;background:linear-gradient(#061923dd,#061923f5);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:25px}
-#inicio h1{color:#48f5ff;text-shadow:0 0 16px #00aaff}
-#inicio p{max-width:330px;line-height:1.6}
-#jogar{padding:16px 30px;background:#00d9f5;color:#06232c;font-size:20px;border-radius:14px}
-#reiniciar{position:fixed;z-index:5;top:50%;left:50%;transform:translate(-50%,-50%);padding:15px;display:none}
-@media(min-width:800px){#controles{left:calc(50% - 350px);right:calc(50% - 350px)}}
+#hud{position:fixed;top:10px;left:10px;right:10px;z-index:2;pointer-events:none;text-shadow:1px 2px 3px #000}
+#vidaFundo{width:155px;height:14px;background:#542020;border:2px solid white;border-radius:8px;overflow:hidden}
+#vida{height:100%;width:100%;background:#28e34e;transition:width .15s}
+#info{margin-top:6px;font-weight:bold;font-size:14px}
+#mensagem{position:fixed;top:40%;left:5%;width:90%;text-align:center;font-size:27px;font-weight:bold;text-shadow:2px 3px 5px black;z-index:4;pointer-events:none}
+#controles{position:fixed;bottom:18px;left:15px;right:15px;display:flex;justify-content:space-between;align-items:end;z-index:3}
+#direcoes{display:grid;grid-template-columns:52px 52px 52px;grid-template-rows:52px 52px 52px;gap:4px}
+button{border:2px solid #b8f5ff;background:#123e54df;color:white;font-size:23px;font-weight:bold;border-radius:14px;touch-action:none;user-select:none;-webkit-user-select:none}
+button:active{background:#00a9d5}
+.mov{width:52px;height:52px}
+#atacar{width:100px;height:82px;border-radius:50%;background:#b92d24eF;font-size:17px}
+#reiniciar{position:fixed;z-index:5;left:50%;top:55%;transform:translateX(-50%);padding:14px 22px;font-size:18px;display:none;touch-action:manipulation}
+#ajuda{font-size:12px;margin-top:4px}
 </style>
 </head>
 <body>
 <canvas id="jogo"></canvas>
 
 <div id="hud">
-  <div class="painel">❤️ Vida: <span id="vida">100</span>
-    <div id="vidaFundo"><div id="vidaBarra"></div></div>
-  </div>
-  <div class="painel">👾 Inimigos: <span id="inimigos">6</span></div>
-  <div class="painel">⭐ Pontos: <span id="pontos">0</span></div>
+  <b>MEU JOGO 3D</b>
+  <div style="margin-top:7px">VIDA</div>
+  <div id="vidaFundo"><div id="vida"></div></div>
+  <div id="info">Pontos: 0 | Inimigos: 5</div>
+  <div id="ajuda">Derrote todos os inimigos!</div>
 </div>
-<div id="mensagem">Explore o mapa e derrote os inimigos!</div>
+
+<div id="mensagem">CARREGANDO MAPA 3D...</div>
+<button id="reiniciar">JOGAR NOVAMENTE</button>
 
 <div id="controles">
-  <div id="setas">
-    <button class="vazio"> </button>
-    <button id="cima">▲</button>
-    <button class="vazio"> </button>
-    <button id="esquerda">◀</button>
-    <button id="baixo">▼</button>
-    <button id="direita">▶</button>
+  <div id="direcoes">
+    <span></span><button class="mov" data-m="cima">▲</button><span></span>
+    <button class="mov" data-m="esquerda">◀</button><button class="mov" data-m="baixo">▼</button><button class="mov" data-m="direita">▶</button>
+    <span></span><span></span><span></span>
   </div>
-  <button id="atacar">⚔️<br>ATACAR</button>
+  <button id="atacar">⚔<br>ATACAR</button>
 </div>
-
-<div id="inicio">
-  <h1>MEU JOGO 3D</h1>
-  <p>Explore um mapa grande, mova seu personagem, enfrente inimigos e sobreviva!</p>
-  <p>Use as setas para andar e o botão ATACAR quando os inimigos estiverem perto.</p>
-  <button id="jogar">ENTRAR NO JOGO</button>
-</div>
-<button id="reiniciar">JOGAR NOVAMENTE</button>
 
 <script>
 (function(){
-"use strict";
 const canvas=document.getElementById("jogo");
 const ctx=canvas.getContext("2d");
-if(!ctx){document.getElementById("mensagem").textContent="Seu navegador não suporta o jogo.";return;}
+const vidaEl=document.getElementById("vida");
+const info=document.getElementById("info");
+const mensagem=document.getElementById("mensagem");
+const atacar=document.getElementById("atacar");
+const reiniciar=document.getElementById("reiniciar");
 
-let W=innerWidth,H=innerHeight,dpr=1;
+let W=innerWidth,H=innerHeight;
 function resize(){
-  W=innerWidth;H=innerHeight;dpr=Math.min(devicePixelRatio||1,2);
-  canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);
-  canvas.style.width=W+"px";canvas.style.height=H+"px";
-  ctx.setTransform(dpr,0,0,dpr,0,0);
+ W=canvas.width=innerWidth;
+ H=canvas.height=innerHeight;
 }
-addEventListener("resize",resize);resize();
+addEventListener("resize",resize);
+resize();
 
-const mapa={w:2600,h:2600};
-let player,enemies,trees,rocks,buildings,keys,vida,pontos,rodando,acabou,ultimoAtaque,tempo;
-function distancia(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
-function aleatorio(a,b){return a+Math.random()*(b-a)}
-function criarMundo(){
-  player={x:1300,y:1300,r:17,dir:0};
-  vida=100;pontos=0;rodando=false;acabou=false;ultimoAtaque=0;tempo=0;
-  keys={up:false,down:false,left:false,right:false};
-  enemies=[];trees=[];rocks=[];buildings=[];
-  for(let i=0;i<6;i++){
-    let a=aleatorio(250,2350),b=aleatorio(250,2350);
-    enemies.push({x:a,y:b,r:17,hp:2,speed:aleatorio(45,65),hit:0,flash:0});
-  }
-  for(let i=0;i<95;i++)trees.push({x:aleatorio(50,2550),y:aleatorio(50,2550),r:aleatorio(13,25)});
-  for(let i=0;i<42;i++)rocks.push({x:aleatorio(50,2550),y:aleatorio(50,2550),r:aleatorio(8,18)});
-  for(let i=0;i<18;i++)buildings.push({x:aleatorio(100,2400),y:aleatorio(100,2400),w:aleatorio(65,125),h:aleatorio(60,105)});
-  atualizarHUD();
-}
-function atualizarHUD(){
-  document.getElementById("vida").textContent=Math.max(0,Math.ceil(vida));
-  document.getElementById("vidaBarra").style.width=Math.max(0,vida)+"%";
-  document.getElementById("inimigos").textContent=enemies?enemies.length:0;
-  document.getElementById("pontos").textContent=pontos;
-}
-function mensagem(t){document.getElementById("mensagem").textContent=t}
+const mapa=23;
+let jogador,inimigos,pontos,vida,acabou,tempo,ataqueAte;
+const teclas={};
+const obstaculos=[];
+
 function iniciar(){
-  criarMundo();rodando=true;
-  document.getElementById("inicio").style.display="none";
-  document.getElementById("reiniciar").style.display="none";
-  mensagem("Encontre os inimigos e ataque de perto!");
+ jogador={x:0,z:0};
+ inimigos=[];
+ pontos=0;vida=100;acabou=false;tempo=0;ataqueAte=0;
+ for(let i=0;i<5;i++){
+  let x,z;
+  do{
+   x=Math.random()*18-9;
+   z=Math.random()*18-9;
+  }while(Math.hypot(x,z)<5);
+  inimigos.push({x,z,vida:3,passo:Math.random()*6});
+ }
+ mensagem.textContent="";
+ reiniciar.style.display="none";
+ atualizarHUD();
 }
-document.getElementById("jogar").addEventListener("click",iniciar);
-document.getElementById("reiniciar").addEventListener("click",iniciar);
 
-function ligarBotao(id,key){
-  const b=document.getElementById(id);
-  const on=e=>{e.preventDefault();keys[key]=true;};
-  const off=e=>{e.preventDefault();keys[key]=false;};
-  b.addEventListener("pointerdown",on);
-  b.addEventListener("pointerup",off);
-  b.addEventListener("pointercancel",off);
-  b.addEventListener("pointerleave",off);
+function atualizarHUD(){
+ vidaEl.style.width=Math.max(0,vida)+"%";
+ info.textContent="Pontos: "+pontos+" | Inimigos: "+inimigos.length;
 }
-ligarBotao("cima","up");ligarBotao("baixo","down");
-ligarBotao("esquerda","left");ligarBotao("direita","right");
+
+function projetar(x,y,z){
+ const escala=Math.min(W/15,H/10);
+ const dx=x-jogador.x;
+ const dz=z-jogador.z;
+ return {
+  x:W/2+(dx-dz)*escala*.72,
+  y:H*.48+(dx+dz)*escala*.36-y*escala
+ };
+}
+
+function poligono(pontos,cor){
+ ctx.beginPath();
+ ctx.moveTo(pontos[0].x,pontos[0].y);
+ for(let i=1;i<pontos.length;i++)ctx.lineTo(pontos[i].x,pontos[i].y);
+ ctx.closePath();
+ ctx.fillStyle=cor;
+ ctx.fill();
+}
+
+function bloco(x,z,tamanho,altura,cor1,cor2){
+ const a=tamanho/2;
+ const p=[
+  projetar(x-a,0,z-a),projetar(x+a,0,z-a),
+  projetar(x+a,0,z+a),projetar(x-a,0,z+a)
+ ];
+ const topo=p.map(v=>({x:v.x,y:v.y-altura}));
+ poligono([p[0],p[1],topo[1],topo[0]],cor1);
+ poligono([p[1],p[2],topo[2],topo[1]],cor2);
+ poligono(topo,"#65a95b");
+}
+
+function desenharChao(){
+ ctx.fillStyle="#87c7ed";
+ ctx.fillRect(0,0,W,H);
+ const a=projetar(-mapa/2,0,-mapa/2);
+ const b=projetar(mapa/2,0,-mapa/2);
+ const c=projetar(mapa/2,0,mapa/2);
+ const d=projetar(-mapa/2,0,mapa/2);
+ poligono([a,b,c,d],"#438c42");
+
+ for(let i=-mapa/2;i<=mapa/2;i++){
+  let p1=projetar(i,0,-mapa/2),p2=projetar(i,0,mapa/2);
+  let p3=projetar(-mapa/2,0,i),p4=projetar(mapa/2,0,i);
+  ctx.strokeStyle="#a5d17a55";
+  ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);
+  ctx.moveTo(p3.x,p3.y);ctx.lineTo(p4.x,p4.y);ctx.stroke();
+ }
+}
+
+function arvore(x,z){
+ const p=projetar(x,0,z);
+ const s=Math.min(W/15,H/10);
+ ctx.fillStyle="#684126";
+ ctx.fillRect(p.x-s*.08,p.y-s*.75,s*.16,s*.75);
+ poligono([
+  {x:p.x,y:p.y-s*1.9},
+  {x:p.x-s*.43,y:p.y-s*.7},
+  {x:p.x+s*.43,y:p.y-s*.7}
+ ],"#176b34");
+ poligono([
+  {x:p.x,y:p.y-s*1.5},
+  {x:p.x-s*.34,y:p.y-s*.45},
+  {x:p.x+s*.34,y:p.y-s*.45}
+ ],"#269847");
+}
+
+function personagem(x,z,cor,ehJogador,vidaAtual){
+ const p=projetar(x,0,z);
+ const s=Math.min(W/15,H/10);
+ const altura=s*.65;
+ // sombra
+ ctx.fillStyle="#15331e88";
+ ctx.beginPath();ctx.ellipse(p.x,p.y,s*.24,s*.12,0,0,Math.PI*2);ctx.fill();
+ // pernas
+ ctx.strokeStyle="#202c39";ctx.lineWidth=s*.12;ctx.lineCap="round";
+ ctx.beginPath();
+ ctx.moveTo(p.x-s*.09,p.y-s*.05);
+ ctx.lineTo(p.x-s*.12,p.y+altura*.03);
+ ctx.moveTo(p.x+s*.09,p.y-s*.05);
+ ctx.lineTo(p.x+s*.12,p.y+altura*.03);
+ ctx.stroke();
+ // corpo
+ poligono([
+  {x:p.x-s*.17,y:p.y-s*.51},
+  {x:p.x+s*.17,y:p.y-s*.51},
+  {x:p.x+s*.13,y:p.y-s*.08},
+  {x:p.x-s*.13,y:p.y-s*.08}
+ ],cor);
+ // braços
+ ctx.strokeStyle=cor;ctx.lineWidth=s*.10;
+ ctx.beginPath();
+ ctx.moveTo(p.x-s*.15,p.y-s*.43);ctx.lineTo(p.x-s*.24,p.y-s*.19);
+ ctx.moveTo(p.x+s*.15,p.y-s*.43);ctx.lineTo(p.x+s*.24,p.y-s*.19);
+ ctx.stroke();
+ // cabeça
+ ctx.fillStyle="#edbc91";
+ ctx.beginPath();ctx.arc(p.x,p.y-s*.62,s*.12,0,Math.PI*2);ctx.fill();
+ // cabelo/capacete
+ ctx.fillStyle=ehJogador?"#152f48":"#421e1e";
+ ctx.beginPath();ctx.arc(p.x,p.y-s*.67,s*.125,Math.PI,Math.PI*2);ctx.fill();
+
+ if(!ehJogador){
+  ctx.fillStyle="#651919";
+  ctx.fillRect(p.x-s*.23,p.y-s*.94,s*.46,s*.055);
+  ctx.fillStyle="#46ff4f";
+  ctx.fillRect(p.x-s*.23,p.y-s*.94,s*.46*(vidaAtual/3),s*.055);
+ }else if(tempo<ataqueAte){
+  ctx.strokeStyle="#e7ffff";ctx.lineWidth=4;
+  ctx.beginPath();ctx.arc(p.x,p.y-s*.35,s*.6,-1.5,1.5);ctx.stroke();
+ }
+}
+
+function desenhar(){
+ desenharChao();
+ // Árvores distribuídas pelo mapa
+ for(let x=-10;x<=10;x+=4){
+  for(let z=-10;z<=10;z+=4){
+   if(Math.abs(x)<2&&Math.abs(z)<2)continue;
+   arvore(x+.4,z+.4);
+  }
+ }
+ // Personagens em ordem de profundidade
+ const todos=inimigos.map(e=>({x:e.x,z:e.z,e})); 
+ todos.push({x:jogador.x,z:jogador.z,player:true});
+ todos.sort((a,b)=>(a.x+a.z)-(b.x+b.z));
+ for(const obj of todos){
+  if(obj.player)personagem(jogador.x,jogador.z,"#167fe5",true);
+  else personagem(obj.e.x,obj.e.z,"#d63b32",false,obj.e.vida);
+ }
+}
+
+function mover(){
+ if(acabou)return;
+ let dx=0,dz=0;
+ if(teclas.cima||teclas.w)dz-=1;
+ if(teclas.baixo||teclas.s)dz+=1;
+ if(teclas.esquerda||teclas.a)dx-=1;
+ if(teclas.direita||teclas.d)dx+=1;
+ if(dx||dz){
+  const n=Math.hypot(dx,dz);
+  jogador.x+=dx/n*.105;
+  jogador.z+=dz/n*.105;
+  jogador.x=Math.max(-10,Math.min(10,jogador.x));
+  jogador.z=Math.max(-10,Math.min(10,jogador.z));
+ }
+ for(const e of inimigos){
+  const dx=jogador.x-e.x,dz=jogador.z-e.z;
+  const d=Math.hypot(dx,dz);
+  if(d>0.9){
+   e.x+=dx/d*.025;
+   e.z+=dz/d*.025;
+  }else{
+   e.passo++;
+   if(e.passo>28){
+    vida-=5;e.passo=0;
+    atualizarHUD();
+   }
+  }
+ }
+ if(vida<=0){
+  vida=0;acabou=true;
+  mensagem.textContent="VOCÊ FOI DERROTADO!";
+  reiniciar.style.display="block";
+ }
+ if(inimigos.length===0&&!acabou){
+  acabou=true;
+  mensagem.textContent="🏆 VOCÊ VENCEU!";
+  reiniciar.style.display="block";
+ }
+}
+
+function atacarAgora(){
+ if(acabou)return;
+ ataqueAte=tempo+12;
+ let alvo=-1,menor=1.85;
+ for(let i=0;i<inimigos.length;i++){
+  const e=inimigos[i];
+  const d=Math.hypot(e.x-jogador.x,e.z-jogador.z);
+  if(d<menor){menor=d;alvo=i;}
+ }
+ if(alvo>=0){
+  inimigos[alvo].vida--;
+  if(inimigos[alvo].vida<=0){
+   inimigos.splice(alvo,1);pontos+=100;
+  }
+  atualizarHUD();
+ }else{
+  mensagem.textContent="CHEGUE MAIS PERTO!";
+  setTimeout(()=>{
+   if(!acabou&&mensagem.textContent==="CHEGUE MAIS PERTO!")
+   mensagem.textContent="";
+  },700);
+ }
+}
+
+document.querySelectorAll("[data-m]").forEach(btn=>{
+ const k=btn.dataset.m;
+ btn.addEventListener("pointerdown",e=>{
+  e.preventDefault();teclas[k]=true;
+  try{btn.setPointerCapture(e.pointerId)}catch(_){}
+ });
+ ["pointerup","pointercancel","lostpointercapture"].forEach(ev=>
+  btn.addEventListener(ev,e=>{teclas[k]=false;})
+ );
+});
+atacar.addEventListener("pointerdown",e=>{
+ e.preventDefault();atacarAgora();
+});
 addEventListener("keydown",e=>{
-  if(["ArrowUp","w","W"].includes(e.key))keys.up=true;
-  if(["ArrowDown","s","S"].includes(e.key))keys.down=true;
-  if(["ArrowLeft","a","A"].includes(e.key))keys.left=true;
-  if(["ArrowRight","d","D"].includes(e.key))keys.right=true;
-  if(e.code==="Space"){e.preventDefault();atacar();}
+ const k=e.key.toLowerCase();
+ if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(k))e.preventDefault();
+ if(k==="arrowup")teclas.cima=true;
+ if(k==="arrowdown")teclas.baixo=true;
+ if(k==="arrowleft")teclas.esquerda=true;
+ if(k==="arrowright")teclas.direita=true;
+ teclas[k]=true;
+ if(k===" ")atacarAgora();
 });
 addEventListener("keyup",e=>{
-  if(["ArrowUp","w","W"].includes(e.key))keys.up=false;
-  if(["ArrowDown","s","S"].includes(e.key))keys.down=false;
-  if(["ArrowLeft","a","A"].includes(e.key))keys.left=false;
-  if(["ArrowRight","d","D"].includes(e.key))keys.right=false;
+ const k=e.key.toLowerCase();
+ if(k==="arrowup")teclas.cima=false;
+ if(k==="arrowdown")teclas.baixo=false;
+ if(k==="arrowleft")teclas.esquerda=false;
+ if(k==="arrowright")teclas.direita=false;
+ teclas[k]=false;
 });
-document.getElementById("atacar").addEventListener("pointerdown",e=>{
-  e.preventDefault();atacar();
-});
+reiniciar.addEventListener("click",iniciar);
 
-function atacar(){
-  if(!rodando||acabou)return;
-  if(performance.now()-ultimoAtaque<420)return;
-  ultimoAtaque=performance.now();
-  let alvo=null,menor=125;
-  for(const en of enemies){
-    const d=distancia(player,en);
-    if(d<menor){menor=d;alvo=en;}
-  }
-  if(alvo){
-    alvo.hp--;alvo.flash=.18;
-    if(alvo.hp<=0){
-      enemies=enemies.filter(e=>e!==alvo);
-      pontos+=100;mensagem("Inimigo derrotado! +100 pontos");
-    }else mensagem("Acertou! Continue atacando!");
-  }else mensagem("Chegue mais perto do inimigo para atacar.");
-  atualizarHUD();
-  if(enemies.length===0)finalizar(true);
+function loop(){
+ tempo++;
+ mover();
+ desenhar();
+ requestAnimationFrame(loop);
 }
-
-function mover(dt){
-  let dx=(keys.right?1:0)-(keys.left?1:0);
-  let dy=(keys.down?1:0)-(keys.up?1:0);
-  const len=Math.hypot(dx,dy);
-  if(len){dx/=len;dy/=len;player.dir=Math.atan2(dy,dx);}
-  const speed=190;
-  player.x=Math.max(25,Math.min(mapa.w-25,player.x+dx*speed*dt));
-  player.y=Math.max(25,Math.min(mapa.h-25,player.y+dy*speed*dt));
-
-  for(const en of enemies){
-    const d=distancia(player,en);
-    if(d>35){
-      en.x+=(player.x-en.x)/d*en.speed*dt;
-      en.y+=(player.y-en.y)/d*en.speed*dt;
-    }
-    if(en.flash>0)en.flash-=dt;
-    en.hit-=dt;
-    if(d<38&&en.hit<=0){
-      vida-=8;en.hit=1.0;
-      atualizarHUD();
-      mensagem("Cuidado! Um inimigo está atacando!");
-      if(vida<=0){vida=0;atualizarHUD();finalizar(false);return;}
-    }
-  }
-}
-function finalizar(vitoria){
-  rodando=false;acabou=true;
-  mensagem(vitoria?"Você venceu! Todos os inimigos foram derrotados!":"Você foi derrotado!");
-  const b=document.getElementById("reiniciar");
-  b.textContent=vitoria?"JOGAR NOVAMENTE":"TENTAR NOVAMENTE";
-  b.style.display="block";
-}
-function circulo(x,y,r,c){
-  ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
-}
-function desenhar(){
-  ctx.clearRect(0,0,W,H);
-  const camX=Math.max(0,Math.min(mapa.w-W,player.x-W/2));
-  const camY=Math.max(0,Math.min(mapa.h-H,player.y-H/2));
-  ctx.save();ctx.translate(-camX,-camY);
-
-  ctx.fillStyle="#4c8950";ctx.fillRect(camX,camY,W,H);
-  // Grama e trilhas
-  ctx.strokeStyle="#70985a";ctx.lineWidth=2;
-  for(let x=Math.floor(camX/90)*90;x<camX+W+90;x+=90){
-    for(let y=Math.floor(camY/90)*90;y<camY+H+90;y+=90){
-      ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+9,y+5);ctx.stroke();
-    }
-  }
-  ctx.fillStyle="#b4a477";
-  ctx.fillRect(0,1250,mapa.w,65);
-  ctx.fillRect(1250,0,65,mapa.h);
-  // Construções
-  for(const b of buildings){
-    ctx.fillStyle="#34454a";ctx.fillRect(b.x,b.y+12,b.w,b.h);
-    ctx.fillStyle="#a9a18a";ctx.fillRect(b.x,b.y,b.w,b.h);
-    ctx.fillStyle="#6e7774";ctx.fillRect(b.x+7,b.y+7,b.w-14,b.h-14);
-    ctx.fillStyle="#263e4c";ctx.fillRect(b.x+b.w*.4,b.y+b.h*.55,b.w*.22,b.h*.45);
-    ctx.fillStyle="#c8d3c9";
-    ctx.fillRect(b.x+12,b.y+15,16,13);
-    ctx.fillRect(b.x+b.w-28,b.y+15,16,13);
-  }
-  // Rochas
-  for(const r of rocks){
-    ctx.fillStyle="#4b514d";ctx.beginPath();
-    ctx.ellipse(r.x,r.y,r.r,r.r*.7,0,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle="#7b827a";ctx.beginPath();
-    ctx.ellipse(r.x-3,r.y-3,r.r*.55,r.r*.35,-.3,0,Math.PI*2);ctx.fill();
-  }
-  // Árvores
-  for(const t of trees){
-    ctx.fillStyle="#493b2b";ctx.fillRect(t.x-5,t.y-3,10,22);
-    circulo(t.x,t.y-9,t.r,"#245c35");
-    circulo(t.x-7,t.y-13,t.r*.62,"#347a3d");
-    circulo(t.x+7,t.y-7,t.r*.55,"#438b43");
-  }
-  // Inimigos
-  for(const en of enemies){
-    circulo(en.x,en.y+7,en.r+3,"#26382b");
-    circulo(en.x,en.y,en.r,en.flash>0?"#fff":"#c83d35");
-    circulo(en.x,en.y-5,8,"#e8b18a");
-    ctx.fillStyle="#211e22";ctx.fillRect(en.x-10,en.y-20,20,4);
-    ctx.fillStyle="#ff4d43";ctx.fillRect(en.x-10,en.y-20,20*Math.max(0,en.hp/2),4);
-  }
-  // Jogador
-  circulo(player.x,player.y+8,20,"#26382b");
-  circulo(player.x,player.y,player.r,"#1688df");
-  circulo(player.x,player.y-6,8,"#f2c49a");
-  ctx.strokeStyle="#d8f8ff";ctx.lineWidth=5;
-  ctx.beginPath();ctx.moveTo(player.x,player.y);
-  ctx.lineTo(player.x+Math.cos(player.dir)*27,player.y+Math.sin(player.dir)*27);
-  ctx.stroke();
-
-  ctx.restore();
-  // Mini mapa
-  const mw=100,mh=100,mx=W-mw-12,my=H>500?75:65;
-  ctx.fillStyle="#071b20dd";ctx.fillRect(mx,my,mw,mh);
-  ctx.strokeStyle="#6df6ef";ctx.strokeRect(mx,my,mw,mh);
-  for(const en of enemies){
-    ctx.fillStyle="#ff5149";
-    ctx.fillRect(mx+en.x/mapa.w*mw-2,my+en.y/mapa.h*mh-2,4,4);
-  }
-  ctx.fillStyle="#55f5ff";
-  ctx.fillRect(mx+player.x/mapa.w*mw-3,my+player.y/mapa.h*mh-3,6,6);
-}
-let anterior=0;
-function loop(agora){
-  const dt=Math.min((agora-anterior)/1000||0,.04);
-  anterior=agora;
-  if(rodando)mover(dt);
-  if(player)desenhar();
-  requestAnimationFrame(loop);
-}
-criarMundo();
-requestAnimationFrame(loop);
+iniciar();
+loop();
 })();
 </script>
 </body>
 </html>
+
 
 
 
