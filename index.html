@@ -5,339 +5,415 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MEU JOGO 3D</title>
-<style>THREE.Group
+<style>
 *{box-sizing:border-box}
 body{margin:0;overflow:hidden;background:#87ceeb;font-family:Arial}
-#info{position:fixed;top:12px;left:12px;color:white;
-background:#0008;padding:12px;border-radius:10px;z-index:2}
-#controls{position:fixed;bottom:20px;left:20px;z-index:3;
-display:grid;grid-template-columns:55px 55px 55px;gap:5px}
+canvas{display:block}
+#info{position:fixed;top:10px;left:10px;color:white;
+background:#0009;padding:10px;border-radius:10px;z-index:2;
+font-size:14px;pointer-events:none}
+#loading{position:fixed;inset:0;display:grid;place-items:center;
+color:white;background:#197d91;font-size:20px;z-index:10;
+text-align:center;padding:20px}
+#controls{position:fixed;bottom:15px;left:12px;z-index:3;
+display:grid;grid-template-columns:52px 52px 52px;gap:5px}
 button{border:0;border-radius:12px;background:#00d9ef;
-color:#003344;font-weight:bold;font-size:20px;min-height:52px;
-touch-action:none}
+color:#003344;font-weight:bold;font-size:22px;min-height:50px;
+touch-action:none;user-select:none;-webkit-user-select:none}
 #up{grid-column:2}
 #left{grid-column:1;grid-row:2}
 #down{grid-column:2;grid-row:2}
 #right{grid-column:3;grid-row:2}
-#jump{position:fixed;right:20px;bottom:35px;width:85px;
-height:65px;z-index:3;font-size:15px}
-#loading{position:fixed;inset:0;display:grid;place-items:center;
-color:white;background:#197d91;font-size:22px;z-index:5}
+#jump{position:fixed;right:15px;bottom:28px;width:80px;
+height:62px;z-index:3;font-size:15px}
+#attack{position:fixed;right:15px;bottom:105px;width:80px;
+height:55px;z-index:3;font-size:14px;background:#ffb52e}
+#status{position:fixed;top:95px;left:10px;color:white;
+background:#0009;padding:8px;border-radius:8px;z-index:2}
 </style>
 </head>
 <body>
+
 <div id="loading">Carregando mapa 3D...</div>
-<div id="info">MEU JOGO 3D<br>Área de treinamento<br>
-Explore o mapa!</div>
+<div id="info">MEU JOGO 3D<br>Área de treinamento</div>
+<div id="status">Inimigos: 3</div>
+
 <div id="controls">
 <button id="up">▲</button>
 <button id="left">◀</button>
 <button id="down">▼</button>
 <button id="right">▶</button>
 </div>
+<button id="attack">ATACAR</button>
 <button id="jump">PULAR</button>
 
-<script type="module">/* INIMIGOS 3D - MEU JOGO 3D */
-const inimigos3D = [];
+<script type="module">
+import * as THREE from
+'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js';
 
-function criarInimigo3D(x, z) {
-  const inimigo = new THREE.Group();
+const loading = document.getElementById('loading');
 
-  const materialCorpo = new THREE.MeshStandardMaterial({
-    color: 0xc62828
-  });
-  const materialPele = new THREE.MeshStandardMaterial({
-    color: 0xe5b18a
-  });
-  const materialCalca = new THREE.MeshStandardMaterial({
-    color: 0x263b70
-  });
-
-  function parte(w, h, d, material, px, py, pz) {
-    const mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(w, h, d),
-      material
-    );
-    mesh.position.set(px, py, pz);
-    inimigo.add(mesh);
-  }
-
-  // Corpo, cabeça, braços e pernas
-  parte(0.8, 1.1, 0.4, materialCorpo, 0, 1.35, 0);
-
-  const cabeca = new THREE.Mesh(
-    new THREE.SphereGeometry(0.3, 12, 10),
-    materialPele
-  );
-  cabeca.position.y = 2.15;
-  inimigo.add(cabeca);
-
-  parte(0.22, 0.85, 0.25, materialCorpo, -0.55, 1.35, 0);
-  parte(0.22, 0.85, 0.25, materialCorpo,  0.55, 1.35, 0);
-  parte(0.28, 0.8, 0.3, materialCalca, -0.22, 0.4, 0);
-  parte(0.28, 0.8, 0.3, materialCalca,  0.22, 0.4, 0);
-
-  inimigo.position.set(x, 0, z);
-  inimigo.userData.vida = 3;
-
-  scene.add(inimigo);
-  inimigos3D.push(inimigo);
-}
-
-// Criar três inimigos no mapa
-criarInimigo3D(5, -8);
-criarInimigo3D(-6, -12);
-criarInimigo3D(10, -16);
-
-// Aproximar os inimigos do jogador
-// A movimentação começa somente se existir o jogador.
-const intervaloInimigos3D = setInterval(() => {
-  if (typeof player === "undefined" || !player.position) return;
-
-  inimigos3D.forEach(inimigo => {
-    if (inimigo.userData.vida <= 0) return;
-
-    const dx = player.position.x - inimigo.position.x;
-    const dz = player.position.z - inimigo.position.z;
-    const distancia = Math.hypot(dx, dz);
-
-    if (distancia > 2.2 && distancia < 35) {
-      inimigo.position.x += dx / distancia * 0.025;
-      inimigo.position.z += dz / distancia * 0.025;
-    }
-
-    inimigo.rotation.y = Math.atan2(dx, dz);
-  });
-}, 50
-
+try {
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87ceeb);
 scene.fog = new THREE.Fog(0x87ceeb, 100, 260);
 
 const camera = new THREE.PerspectiveCamera(
-70, innerWidth/innerHeight, 0.1, 500
+70, innerWidth / innerHeight, 0.1, 500
 );
+
 const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xffffff,0x45623a,2));
-const sun = new THREE.DirectionalLight(0xffffff,2);
-sun.position.set(40,70,30);
-sun.castShadow = true;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x45623a, 2));
+
+const sun = new THREE.DirectionalLight(0xffffff, 2);
+sun.position.set(40, 70, 30);
 scene.add(sun);
 
-function material(color){
- return new THREE.MeshStandardMaterial({color});
+function material(color) {
+return new THREE.MeshStandardMaterial({color});
 }
-function box(x,y,z,w,h,d,color){
- const obj = new THREE.Mesh(
-  new THREE.BoxGeometry(w,h,d),material(color)
- );
- obj.position.set(x,y,z);
- obj.castShadow = true;
- obj.receiveShadow = true;
- scene.add(obj);
- return obj;
+
+function box(x,y,z,w,h,d,color) {
+const obj = new THREE.Mesh(
+new THREE.BoxGeometry(w,h,d), material(color));
+obj.position.set(x,y,z);
+obj.castShadow = true;
+obj.receiveShadow = true;
+scene.add(obj);
+return obj;
 }
-import * as THREE from
-'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js'
-// TERRENO GRANDE
+
+// TERRENO
 const ground = new THREE.Mesh(
- new THREE.PlaneGeometry(300,300),
- material(0x477d37)
-);
+new THREE.PlaneGeometry(300,300), material(0x477d37));
 ground.rotation.x = -Math.PI/2;
 ground.receiveShadow = true;
 scene.add(ground);
 
-// CAMINHO DE TERRA
+// CAMINHO
 const road = new THREE.Mesh(
- new THREE.PlaneGeometry(16,220),
- material(0xbca477)
-);
+new THREE.PlaneGeometry(16,220), material(0xbca477));
 road.rotation.x = -Math.PI/2;
-road.position.set(0,0.025,0);
+road.position.y = 0.03;
 scene.add(road);
 
-// MONTANHAS AO REDOR
+// MONTANHAS
 for(let i=0;i<18;i++){
- const a=i*Math.PI*2/18;
- const r=125;
- const mountain = new THREE.Mesh(
-  new THREE.ConeGeometry(12+Math.random()*12,
-   22+Math.random()*35,5),
-  material(i%2?0x68796b:0x718b70)
- );
- mountain.position.set(
-  Math.cos(a)*r,12,Math.sin(a)*r
- );
- mountain.castShadow=true;
- scene.add(mountain);
+const a=i*Math.PI*2/18;
+const mountain = new THREE.Mesh(
+new THREE.ConeGeometry(12+Math.random()*12,
+22+Math.random()*25,5),
+material(i%2 ? 0x68796b : 0x718b70));
+mountain.position.set(Math.cos(a)*125,12,
+Math.sin(a)*125);
+scene.add(mountain);
 }
 
 // ÁRVORES
 function tree(x,z,s=1){
- const trunk = new THREE.Mesh(
-  new THREE.CylinderGeometry(.45*s,.7*s,4*s,7),
-  material(0x704626)
- );
- trunk.position.set(x,2*s,z);
- trunk.castShadow=true;
- scene.add(trunk);
- for(let i=0;i<3;i++){
-  const leaves = new THREE.Mesh(
-   new THREE.ConeGeometry((3-i*.45)*s,5*s,7),
-   material(i===1?0x23813a:0x17652c)
-  );
-  leaves.position.set(x,(4.5+i*2)*s,z);
-  leaves.castShadow=true;
-  scene.add(leaves);
- }
+const trunk = new THREE.Mesh(
+new THREE.CylinderGeometry(.45*s,.7*s,4*s,7),
+material(0x704626));
+trunk.position.set(x,2*s,z);
+scene.add(trunk);
+
+for(let i=0;i<3;i++){
+const leaves = new THREE.Mesh(
+new THREE.ConeGeometry((3-i*.45)*s,5*s,7),
+material(i===1 ? 0x23813a : 0x17652c));
+leaves.position.set(x,(4.5+i*2)*s,z);
+scene.add(leaves);
 }
+}
+
 for(let i=0;i<100;i++){
- let x=(Math.random()-.5)*270;
- let z=(Math.random()-.5)*270;
- if(Math.abs(x)<14 && Math.abs(z)<100) continue;
- tree(x,z,.7+Math.random()*.8);
+const x=(Math.random()-.5)*270;
+const z=(Math.random()-.5)*270;
+if(Math.abs(x)<14 && Math.abs(z)<100) continue;
+tree(x,z,.7+Math.random()*.8);
 }
 
 // CASAS
 function house(x,z,color){
- box(x,2,z,10,4,9,color);
- const roof = new THREE.Mesh(
-  new THREE.ConeGeometry(7.5,4,4),
-  material(0x793b2a)
- );
- roof.position.set(x,6,z);
- roof.rotation.y=Math.PI/4;
- roof.castShadow=true;
- scene.add(roof);
- box(x,1,z+4.56,1.6,2.2,.15,0x38251b);
- box(x-2.7,2.5,z+4.6,1.8,1.4,.15,0x8ee5ff);
- box(x+2.7,2.5,z+4.6,1.8,1.4,.15,0x8ee5ff);
+box(x,2,z,10,4,9,color);
+
+const roof = new THREE.Mesh(
+new THREE.ConeGeometry(7.5,4,4),material(0x793b2a));
+roof.position.set(x,6,z);
+roof.rotation.y=Math.PI/4;
+scene.add(roof);
+
+box(x,1,z+4.56,1.6,2.2,.15,0x38251b);
+box(x-2.7,2.5,z+4.6,1.8,1.4,.15,0x8ee5ff);
+box(x+2.7,2.5,z+4.6,1.8,1.4,.15,0x8ee5ff);
 }
+
 house(-27,-28,0xd6bd8d);
 house(29,-48,0xc4c6cc);
 house(-35,25,0xd9a16d);
 house(34,30,0xd5d3b5);
 
-// OBSTÁCULOS E CAIXAS
+// CAIXAS
 for(let i=0;i<22;i++){
- box((Math.random()-.5)*100,1,
- (Math.random()-.5)*100,2,2,2,0x967044);
+box((Math.random()-.5)*100,1,
+(Math.random()-.5)*100,2,2,2,0x967044);
 }
 
-// PERSONAGEM ORIGINAL SIMPLES
+// PERSONAGEM ORIGINAL
 const player = new THREE.Group();
+
 const shirt = new THREE.Mesh(
- new THREE.CylinderGeometry(.65,.8,1.8,10),
- material(0xff7518)
-);
+new THREE.CylinderGeometry(.65,.8,1.8,10),
+material(0xff7518));
 shirt.position.y=2.3;
-shirt.castShadow=true;
 player.add(shirt);
 
 const head = new THREE.Mesh(
- new THREE.SphereGeometry(.58,12,12),
- material(0xffc58b)
-);
+new THREE.SphereGeometry(.58,12,12),
+material(0xffc58b));
 head.position.y=3.65;
 player.add(head);
 
 const hair = new THREE.Mesh(
- new THREE.SphereGeometry(.6,12,8,0,Math.PI*2,0,Math.PI/2),
- material(0x493026)
-);
+new THREE.SphereGeometry(.6,12,8,0,Math.PI*2,0,Math.PI/2),
+material(0x493026));
 hair.position.y=3.9;
 player.add(hair);
 
 for(const side of [-1,1]){
- const leg = new THREE.Mesh(
-  new THREE.BoxGeometry(.42,1.2,.5),
-  material(0x354c86)
- );
- leg.position.set(side*.32,.9,0);
- player.add(leg);
- const arm = new THREE.Mesh(
-  new THREE.BoxGeometry(.3,1.25,.35),
-  material(0xffc58b)
- );
- arm.position.set(side*.85,2.25,0);
- player.add(arm);
+const leg = new THREE.Mesh(
+new THREE.BoxGeometry(.42,1.2,.5),
+material(0x354c86));
+leg.position.set(side*.32,.9,0);
+player.add(leg);
+
+const arm = new THREE.Mesh(
+new THREE.BoxGeometry(.3,1.25,.35),
+material(0xffc58b));
+arm.position.set(side*.85,2.25,0);
+player.add(arm);
 }
+
 player.position.set(0,0,8);
 scene.add(player);
 
-// CONTROLES
-const keys={};
-addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true);
-addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
-addEventListener('blur',()=>Object.keys(keys).forEach(k=>keys[k]=false));
+// INIMIGOS 3D
+const inimigos = [];
 
-for(const [id,key] of [
- ['up','w'],['down','s'],['left','a'],['right','d']
-]){
- const btn=document.getElementById(id);
- btn.addEventListener('pointerdown',e=>{
-  e.preventDefault();keys[key]=true;
- });
- for(const event of ['pointerup','pointercancel','pointerleave']){
-  btn.addEventListener(event,()=>keys[key]=false);
- }
+function criarInimigo(x,z){
+const enemy = new THREE.Group();
+
+function parte(w,h,d,color,px,py,pz){
+const mesh = new THREE.Mesh(
+new THREE.BoxGeometry(w,h,d),material(color));
+mesh.position.set(px,py,pz);
+enemy.add(mesh);
 }
 
-let jumping=false, velocityY=0;
-document.getElementById('jump').addEventListener('pointerdown',()=>{
- if(!jumping){velocityY=8;jumping=true;}
+parte(.8,1.1,.4,0xc62828,0,1.35,0);
+
+const cabeca = new THREE.Mesh(
+new THREE.SphereGeometry(.3,12,10),
+material(0xe5b18a));
+cabeca.position.y=2.15;
+enemy.add(cabeca);
+
+parte(.22,.85,.25,0xc62828,-.55,1.35,0);
+parte(.22,.85,.25,0xc62828,.55,1.35,0);
+parte(.28,.8,.3,0x263b70,-.22,.4,0);
+parte(.28,.8,.3,0x263b70,.22,.4,0);
+
+enemy.position.set(x,0,z);
+enemy.userData.vida=3;
+scene.add(enemy);
+inimigos.push(enemy);
+}
+
+criarInimigo(5,-8);
+criarInimigo(-6,-12);
+criarInimigo(10,-16);
+
+// CONTROLES DO CELULAR E TECLADO
+const keys={};
+
+addEventListener('keydown',e=>{
+keys[e.key.toLowerCase()]=true;
 });
 
-const clock = new THREE.Clock();
-const direction = new THREE.Vector3();
+addEventListener('keyup',e=>{
+keys[e.key.toLowerCase()]=false;
+});
+
+addEventListener('blur',()=>{
+Object.keys(keys).forEach(k=>keys[k]=false);
+});
+
+for(const [id,key] of [
+['up','w'],['down','s'],['left','a'],['right','d']
+]){
+const btn=document.getElementById(id);
+
+btn.addEventListener('pointerdown',e=>{
+e.preventDefault();
+keys[key]=true;
+});
+
+for(const event of ['pointerup','pointercancel','pointerleave']){
+btn.addEventListener(event,()=>keys[key]=false);
+}
+}
+
+let jumping=false;
+let velocityY=0;
+
+document.getElementById('jump').addEventListener(
+'pointerdown',e=>{
+e.preventDefault();
+if(!jumping){
+velocityY=8;
+jumping=true;
+}
+});
+
+let attackCooldown=0;
+
+document.getElementById('attack').addEventListener(
+'pointerdown',e=>{
+e.preventDefault();
+
+if(attackCooldown>0) return;
+attackCooldown=.35;
+
+let alvo=null;
+let menor=3.5;
+
+for(const enemy of inimigos){
+if(enemy.userData.vida<=0) continue;
+
+const distancia=player.position.distanceTo(enemy.position);
+if(distancia<menor){
+menor=distancia;
+alvo=enemy;
+}
+}
+
+if(alvo){
+alvo.userData.vida--;
+
+if(alvo.userData.vida<=0){
+scene.remove(alvo);
+document.getElementById('status').textContent=
+'Inimigos restantes: '+
+inimigos.filter(i=>i.userData.vida>0).length;
+}else{
+document.getElementById('status').textContent=
+'Inimigo atingido! Vida: '+alvo.userData.vida;
+}
+}else{
+document.getElementById('status').textContent=
+'Chegue mais perto para atacar!';
+}
+});
+
+// ANIMAÇÃO
+const clock=new THREE.Clock();
+const direction=new THREE.Vector3();
+const offset=new THREE.Vector3();
 
 function animate(){
- requestAnimationFrame(animate);
- const dt=Math.min(clock.getDelta(),.05);
+requestAnimationFrame(animate);
 
- direction.set(0,0,0);
- if(keys.w||keys.arrowup) direction.z-=1;
- if(keys.s||keys.arrowdown) direction.z+=1;
- if(keys.a||keys.arrowleft) direction.x-=1;
- if(keys.d||keys.arrowright) direction.x+=1;
+const dt=Math.min(clock.getDelta(),.05);
 
- if(direction.length()>0){
-  direction.normalize();
-  player.position.x+=direction.x*12*dt;
-  player.position.z+=direction.z*12*dt;
-  player.rotation.y=Math.atan2(direction.x,direction.z);
- }
+direction.set(0,0,0);
 
- // LIMITES DO MAPA
- player.position.x=THREE.MathUtils.clamp(player.position.x,-140,140);
- player.position.z=THREE.MathUtils.clamp(player.position.z,-140,140);
+if(keys.w||keys.arrowup) direction.z-=1;
+if(keys.s||keys.arrowdown) direction.z+=1;
+if(keys.a||keys.arrowleft) direction.x-=1;
+if(keys.d||keys.arrowright) direction.x+=1;
 
- if(jumping){
-  player.position.y+=velocityY*dt;
-  velocityY-=20*dt;
-  if(player.position.y<=0){
-   player.position.y=0;
-   jumping=false;
-   velocityY=0;
-  }
- }
+if(direction.lengthSq()>0){
+direction.normalize();
+player.position.x+=direction.x*12*dt;
+player.position.z+=direction.z*12*dt;
+player.rotation.y=Math.atan2(direction.x,direction.z);
+}
 
- // CÂMERA SEGUE O PERSONAGEM
- const offset=new THREE.Vector3(0,8,13);
- offset.applyAxisAngle(new THREE.Vector3(0,1,0),player.rotation.y);
- const target=player.position.clone().add(offset);
- camera.position.lerp(target,Math.min(1,5*dt));
- camera.lookAt(
-  player.position.x,player.position.y+2,player.position
-</script
+player.position.x=THREE.MathUtils.clamp(
+player.position.x,-140,140);
+player.position.z=THREE.MathUtils.clamp(
+player.position.z,-140,140);
+
+if(jumping){
+player.position.y+=velocityY*dt;
+velocityY-=20*dt;
+
+if(player.position.y<=0){
+player.position.y=0;
+jumping=false;
+velocityY=0;
+}
+}
+
+if(attackCooldown>0) attackCooldown-=dt;
+
+// INIMIGOS SEGUEM O JOGADOR
+for(const enemy of inimigos){
+if(enemy.userData.vida<=0) continue;
+
+const dx=player.position.x-enemy.position.x;
+const dz=player.position.z-enemy.position.z;
+const distancia=Math.hypot(dx,dz);
+
+if(distancia>2.2 && distancia<35){
+enemy.position.x+=dx/distancia*2.5*dt;
+enemy.position.z+=dz/distancia*2.5*dt;
+}
+
+if(distancia>0.01){
+enemy.rotation.y=Math.atan2(dx,dz);
+}
+}
+
+// CÂMERA SEGUE O PERSONAGEM
+offset.set(0,8,13);
+offset.applyAxisAngle(
+new THREE.Vector3(0,1,0),player.rotation.y);
+
+const target=player.position.clone().add(offset);
+camera.position.lerp(target,Math.min(1,5*dt));
+camera.lookAt(
+player.position.x,
+player.position.y+2,
+player.position.z
+);
+
+renderer.render(scene,camera);
+}
+
+addEventListener('resize',()=>{
+camera.aspect=innerWidth/innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(innerWidth,innerHeight);
+});
+
+animate();
+loading.style.display='none';
+
+}catch(error){
+console.error(error);
+loading.textContent=
+'Erro ao abrir o jogo. Verifique sua internet e recarregue a página.';
+}
+
+</script>
 </body>
 </html>
+
 
 
