@@ -257,11 +257,14 @@ function mover(){
   mensagem.textContent="VOCÊ FOI DERROTADO!";
   reiniciar.style.display="block";
  }
- if(inimigos.length===0&&!acabou){
+ 
+if(inimigos.length===0 && !acabou){
   acabou=true;
   mensagem.textContent="🏆 VOCÊ VENCEU!";
+  mensagem.style.display="block";
   reiniciar.style.display="block";
- }
+}
+  
 }
 
 function atacarAgora(){
@@ -281,11 +284,7 @@ function atacarAgora(){
   atualizarHUD();
  }else{
   mensagem.textContent="CHEGUE MAIS PERTO!";
-  setTimeout(()=>{
-   if(!acabou&&mensagem.textContent==="CHEGUE MAIS PERTO!")
-   mensagem.textContent="";
-  },700);
- }
+  
 }
 
 document.querySelectorAll("[data-m]").forEach(btn=>{
