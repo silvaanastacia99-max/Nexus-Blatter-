@@ -246,9 +246,22 @@ function mover(){
    e.z+=dz/d*.025;
   }else{
    e.passo++;
-   if(e.passo>28){
-    vida-=5;e.passo=0;
-    atualizarHUD();
+   
+if(inimigos[alvo].vida<=0){
+  inimigos.splice(alvo,1);
+  pontos+=100;
+}
+
+atualizarHUD();
+
+if(inimigos.length===0){
+  acabou=true;
+  mensagem.textContent="🏆 VOCÊ VENCEU!";
+  mensagem.style.display="block";
+  reiniciar.style.display="block";
+  return;
+}
+    
    }
   }
  }
