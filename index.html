@@ -4,47 +4,46 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>NexusBlatter</title>
-<link rel="icon" type="image/png" href="icone.png">
 <style>
 *{box-sizing:border-box}
 body{margin:0;overflow:hidden;background:#101c25;font-family:Arial;color:white;touch-action:none}
 canvas{display:block;width:100vw;height:100dvh}
-#hud{position:fixed;top:10px;left:10px;right:10px;z-index:2;pointer-events:none;text-shadow:1px 2px 3px #000}
+#hud{position:fixed;top:10px;left:10px;z-index:2;text-shadow:1px 2px 3px #000;pointer-events:none}
 #vidaFundo{width:155px;height:14px;background:#542020;border:2px solid white;border-radius:8px;overflow:hidden}
-#vida{height:100%;width:100%;background:#28e34e;transition:width .15s}
+#vida{height:100%;width:100%;background:#28e34e}
 #info{margin-top:6px;font-weight:bold;font-size:14px}
+#ajuda{font-size:12px;margin-top:4px}
 #mensagem{position:fixed;top:40%;left:5%;width:90%;text-align:center;font-size:27px;font-weight:bold;text-shadow:2px 3px 5px black;z-index:4;pointer-events:none}
 #controles{position:fixed;bottom:18px;left:15px;right:15px;display:flex;justify-content:space-between;align-items:end;z-index:3}
 #direcoes{display:grid;grid-template-columns:52px 52px 52px;grid-template-rows:52px 52px 52px;gap:4px}
-button{border:2px solid #b8f5ff;background:#123e54df;color:white;font-size:23px;font-weight:bold;border-radius:14px;touch-action:none;user-select:none;-webkit-user-select:none}
+button{border:2px solid #b8f5ff;background:#123e54df;color:white;font-size:23px;font-weight:bold;border-radius:14px;touch-action:none;user-select:none}
 button:active{background:#00a9d5}
 .mov{width:52px;height:52px}
-#atacar{width:100px;height:82px;border-radius:50%;background:#b92d24eF;font-size:17px}
+#atacar{width:100px;height:82px;border-radius:50%;background:#b92d24;font-size:17px}
 #reiniciar{position:fixed;z-index:5;left:50%;top:55%;transform:translateX(-50%);padding:14px 22px;font-size:18px;display:none;touch-action:manipulation}
-#ajuda{font-size:12px;margin-top:4px}
 </style>
 </head>
 <body>
 <canvas id="jogo"></canvas>
 
 <div id="hud">
-  <b>MEU JOGO 3D</b>
-  <div style="margin-top:7px">VIDA</div>
-  <div id="vidaFundo"><div id="vida"></div></div>
-  <div id="info">Pontos: 0 | Inimigos: 5</div>
-  <div id="ajuda">Derrote todos os inimigos!</div>
+<b>NexusBlatter</b>
+<div style="margin-top:7px">VIDA</div>
+<div id="vidaFundo"><div id="vida"></div></div>
+<div id="info">Pontos: 0 | Inimigos: 5</div>
+<div id="ajuda">Derrote todos os inimigos!</div>
 </div>
 
 <div id="mensagem">CARREGANDO MAPA 3D...</div>
 <button id="reiniciar">JOGAR NOVAMENTE</button>
 
 <div id="controles">
-  <div id="direcoes">
-    <span></span><button class="mov" data-m="cima">▲</button><span></span>
-    <button class="mov" data-m="esquerda">◀</button><button class="mov" data-m="baixo">▼</button><button class="mov" data-m="direita">▶</button>
-    <span></span><span></span><span></span>
-  </div>
-  <button id="atacar">⚔<br>ATACAR</button>
+<div id="direcoes">
+<span></span><button class="mov" data-m="cima">▲</button><span></span>
+<button class="mov" data-m="esquerda">◀</button><button class="mov" data-m="baixo">▼</button><button class="mov" data-m="direita">▶</button>
+<span></span><span></span><span></span>
+</div>
+<button id="atacar">⚔<br>ATACAR</button>
 </div>
 
 <script>
@@ -68,21 +67,27 @@ resize();
 const mapa=23;
 let jogador,inimigos,pontos,vida,acabou,tempo,ataqueAte;
 const teclas={};
-const obstaculos=[];
 
 function iniciar(){
  jogador={x:0,z:0};
  inimigos=[];
- pontos=0;vida=100;acabou=false;tempo=0;ataqueAte=0;
+ pontos=0;
+ vida=100;
+ acabou=false;
+ tempo=0;
+ ataqueAte=0;
+
  for(let i=0;i<5;i++){
   let x,z;
   do{
    x=Math.random()*18-9;
    z=Math.random()*18-9;
   }while(Math.hypot(x,z)<5);
-  inimigos.push({x,z,vida:3,passo:Math.random()*6});
+  inimigos.push({x,z,vida:3,passo:0});
  }
- mensagem.textContent="";
+
+ for(const k in teclas)teclas[k]=false;
+ mensagem.style.display="none";
  reiniciar.style.display="none";
  atualizarHUD();
 }
@@ -90,6 +95,25 @@ function iniciar(){
 function atualizarHUD(){
  vidaEl.style.width=Math.max(0,vida)+"%";
  info.textContent="Pontos: "+pontos+" | Inimigos: "+inimigos.length;
+}
+
+function verificarFim(){
+ if(acabou)return;
+
+ if(inimigos.length===0){
+  acabou=true;
+  mensagem.textContent="🏆 VOCÊ VENCEU!";
+  mensagem.style.display="block";
+  reiniciar.style.display="block";
+  atualizarHUD();
+ }else if(vida<=0){
+  vida=0;
+  acabou=true;
+  mensagem.textContent="💥 VOCÊ FOI DERROTADO!";
+  mensagem.style.display="block";
+  reiniciar.style.display="block";
+  atualizarHUD();
+ }
 }
 
 function projetar(x,y,z){
@@ -102,30 +126,19 @@ function projetar(x,y,z){
  };
 }
 
-function poligono(pontos,cor){
+function poligono(ps,cor){
  ctx.beginPath();
- ctx.moveTo(pontos[0].x,pontos[0].y);
- for(let i=1;i<pontos.length;i++)ctx.lineTo(pontos[i].x,pontos[i].y);
+ ctx.moveTo(ps[0].x,ps[0].y);
+ for(let i=1;i<ps.length;i++)ctx.lineTo(ps[i].x,ps[i].y);
  ctx.closePath();
  ctx.fillStyle=cor;
  ctx.fill();
 }
 
-function bloco(x,z,tamanho,altura,cor1,cor2){
- const a=tamanho/2;
- const p=[
-  projetar(x-a,0,z-a),projetar(x+a,0,z-a),
-  projetar(x+a,0,z+a),projetar(x-a,0,z+a)
- ];
- const topo=p.map(v=>({x:v.x,y:v.y-altura}));
- poligono([p[0],p[1],topo[1],topo[0]],cor1);
- poligono([p[1],p[2],topo[2],topo[1]],cor2);
- poligono(topo,"#65a95b");
-}
-
 function desenharChao(){
  ctx.fillStyle="#87c7ed";
  ctx.fillRect(0,0,W,H);
+
  const a=projetar(-mapa/2,0,-mapa/2);
  const b=projetar(mapa/2,0,-mapa/2);
  const c=projetar(mapa/2,0,mapa/2);
@@ -133,12 +146,18 @@ function desenharChao(){
  poligono([a,b,c,d],"#438c42");
 
  for(let i=-mapa/2;i<=mapa/2;i++){
-  let p1=projetar(i,0,-mapa/2),p2=projetar(i,0,mapa/2);
-  let p3=projetar(-mapa/2,0,i),p4=projetar(mapa/2,0,i);
+  let p1=projetar(i,0,-mapa/2);
+  let p2=projetar(i,0,mapa/2);
+  let p3=projetar(-mapa/2,0,i);
+  let p4=projetar(mapa/2,0,i);
   ctx.strokeStyle="#a5d17a55";
   ctx.lineWidth=1;
-  ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);
-  ctx.moveTo(p3.x,p3.y);ctx.lineTo(p4.x,p4.y);ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(p1.x,p1.y);
+  ctx.lineTo(p2.x,p2.y);
+  ctx.moveTo(p3.x,p3.y);
+  ctx.lineTo(p4.x,p4.y);
+  ctx.stroke();
  }
 }
 
@@ -163,74 +182,91 @@ function personagem(x,z,cor,ehJogador,vidaAtual){
  const p=projetar(x,0,z);
  const s=Math.min(W/15,H/10);
  const altura=s*.65;
- // sombra
+
  ctx.fillStyle="#15331e88";
- ctx.beginPath();ctx.ellipse(p.x,p.y,s*.24,s*.12,0,0,Math.PI*2);ctx.fill();
- // pernas
- ctx.strokeStyle="#202c39";ctx.lineWidth=s*.12;ctx.lineCap="round";
+ ctx.beginPath();
+ ctx.ellipse(p.x,p.y,s*.24,s*.12,0,0,Math.PI*2);
+ ctx.fill();
+
+ ctx.strokeStyle="#202c39";
+ ctx.lineWidth=s*.12;
+ ctx.lineCap="round";
  ctx.beginPath();
  ctx.moveTo(p.x-s*.09,p.y-s*.05);
  ctx.lineTo(p.x-s*.12,p.y+altura*.03);
  ctx.moveTo(p.x+s*.09,p.y-s*.05);
  ctx.lineTo(p.x+s*.12,p.y+altura*.03);
  ctx.stroke();
- // corpo
+
  poligono([
   {x:p.x-s*.17,y:p.y-s*.51},
   {x:p.x+s*.17,y:p.y-s*.51},
   {x:p.x+s*.13,y:p.y-s*.08},
   {x:p.x-s*.13,y:p.y-s*.08}
  ],cor);
- // braços
- ctx.strokeStyle=cor;ctx.lineWidth=s*.10;
+
+ ctx.strokeStyle=cor;
+ ctx.lineWidth=s*.10;
  ctx.beginPath();
- ctx.moveTo(p.x-s*.15,p.y-s*.43);ctx.lineTo(p.x-s*.24,p.y-s*.19);
- ctx.moveTo(p.x+s*.15,p.y-s*.43);ctx.lineTo(p.x+s*.24,p.y-s*.19);
+ ctx.moveTo(p.x-s*.15,p.y-s*.43);
+ ctx.lineTo(p.x-s*.24,p.y-s*.19);
+ ctx.moveTo(p.x+s*.15,p.y-s*.43);
+ ctx.lineTo(p.x+s*.24,p.y-s*.19);
  ctx.stroke();
- // cabeça
+
  ctx.fillStyle="#edbc91";
- ctx.beginPath();ctx.arc(p.x,p.y-s*.62,s*.12,0,Math.PI*2);ctx.fill();
- // cabelo/capacete
+ ctx.beginPath();
+ ctx.arc(p.x,p.y-s*.62,s*.12,0,Math.PI*2);
+ ctx.fill();
+
  ctx.fillStyle=ehJogador?"#152f48":"#421e1e";
- ctx.beginPath();ctx.arc(p.x,p.y-s*.67,s*.125,Math.PI,Math.PI*2);ctx.fill();
+ ctx.beginPath();
+ ctx.arc(p.x,p.y-s*.67,s*.125,Math.PI,Math.PI*2);
+ ctx.fill();
 
  if(!ehJogador){
   ctx.fillStyle="#651919";
   ctx.fillRect(p.x-s*.23,p.y-s*.94,s*.46,s*.055);
   ctx.fillStyle="#46ff4f";
-  ctx.fillRect(p.x-s*.23,p.y-s*.94,s*.46*(vidaAtual/3),s*.055);
+  ctx.fillRect(p.x-s*.23,p.y-s*.94,s*.46*Math.max(0,vidaAtual/3),s*.055);
  }else if(tempo<ataqueAte){
-  ctx.strokeStyle="#e7ffff";ctx.lineWidth=4;
-  ctx.beginPath();ctx.arc(p.x,p.y-s*.35,s*.6,-1.5,1.5);ctx.stroke();
+  ctx.strokeStyle="#e7ffff";
+  ctx.lineWidth=4;
+  ctx.beginPath();
+  ctx.arc(p.x,p.y-s*.35,s*.6,-1.5,1.5);
+  ctx.stroke();
  }
 }
 
 function desenhar(){
  desenharChao();
- // Árvores distribuídas pelo mapa
+
  for(let x=-10;x<=10;x+=4){
   for(let z=-10;z<=10;z+=4){
    if(Math.abs(x)<2&&Math.abs(z)<2)continue;
    arvore(x+.4,z+.4);
   }
  }
- // Personagens em ordem de profundidade
- const todos=inimigos.map(e=>({x:e.x,z:e.z,e})); 
+
+ const todos=inimigos.map(e=>({x:e.x,z:e.z,e}));
  todos.push({x:jogador.x,z:jogador.z,player:true});
  todos.sort((a,b)=>(a.x+a.z)-(b.x+b.z));
+
  for(const obj of todos){
-  if(obj.player)personagem(jogador.x,jogador.z,"#167fe5",true);
+  if(obj.player)personagem(jogador.x,jogador.z,"#167fe5",true,0);
   else personagem(obj.e.x,obj.e.z,"#d63b32",false,obj.e.vida);
  }
 }
 
 function mover(){
  if(acabou)return;
+
  let dx=0,dz=0;
- if(teclas.cima||teclas.w)dz-=1;
- if(teclas.baixo||teclas.s)dz+=1;
- if(teclas.esquerda||teclas.a)dx-=1;
- if(teclas.direita||teclas.d)dx+=1;
+ if(teclas.cima||teclas.w||teclas.arrowup)dz-=1;
+ if(teclas.baixo||teclas.s||teclas.arrowdown)dz+=1;
+ if(teclas.esquerda||teclas.a||teclas.arrowleft)dx-=1;
+ if(teclas.direita||teclas.d||teclas.arrowright)dx+=1;
+
  if(dx||dz){
   const n=Math.hypot(dx,dz);
   jogador.x+=dx/n*.105;
@@ -238,91 +274,98 @@ function mover(){
   jogador.x=Math.max(-10,Math.min(10,jogador.x));
   jogador.z=Math.max(-10,Math.min(10,jogador.z));
  }
+
  for(const e of inimigos){
-  const dx=jogador.x-e.x,dz=jogador.z-e.z;
-  const d=Math.hypot(dx,dz);
-  if(d>0.9){
-   e.x+=dx/d*.025;
-   e.z+=dz/d*.025;
+  const ex=jogador.x-e.x;
+  const ez=jogador.z-e.z;
+  const d=Math.hypot(ex,ez);
+
+  if(d>1.05){
+   e.x+=ex/d*.018;
+   e.z+=ez/d*.018;
   }else{
    e.passo++;
-   
-if(inimigos[alvo].vida<=0){
-  inimigos.splice(alvo,1);
-  pontos+=100;
-}
-
-atualizarHUD();
-
-if(inimigos.length===0){
-  acabou=true;
-  mensagem.textContent="🏆 VOCÊ VENCEU!";
-  mensagem.style.display="block";
-  reiniciar.style.display="block";
-  return;
-}
-    
+   if(e.passo>=35){
+    vida=Math.max(0,vida-2);
+    e.passo=0;
+    atualizarHUD();
    }
   }
  }
- if(vida<=0){
-  vida=0;acabou=true;
-  mensagem.textContent="VOCÊ FOI DERROTADO!";
-  reiniciar.style.display="block";
- }
- 
-if(inimigos.length===0 && !acabou){
-  acabou=true;
-  mensagem.textContent="🏆 VOCÊ VENCEU!";
-  mensagem.style.display="block";
-  reiniciar.style.display="block";
-}
-  
+
+ verificarFim();
 }
 
 function atacarAgora(){
  if(acabou)return;
+
  ataqueAte=tempo+12;
- let alvo=-1,menor=1.85;
+ let alvo=-1;
+ let menor=1.85;
+
  for(let i=0;i<inimigos.length;i++){
   const e=inimigos[i];
   const d=Math.hypot(e.x-jogador.x,e.z-jogador.z);
-  if(d<menor){menor=d;alvo=i;}
+  if(d<menor){
+   menor=d;
+   alvo=i;
+  }
  }
+
  if(alvo>=0){
   inimigos[alvo].vida--;
+
   if(inimigos[alvo].vida<=0){
-   inimigos.splice(alvo,1);pontos+=100;
+   inimigos.splice(alvo,1);
+   pontos+=100;
   }
+
+  mensagem.style.display="none";
   atualizarHUD();
+  verificarFim();
  }else{
   mensagem.textContent="CHEGUE MAIS PERTO!";
-  
+  mensagem.style.display="block";
+  setTimeout(()=>{
+   if(!acabou && mensagem.textContent==="CHEGUE MAIS PERTO!"){
+    mensagem.style.display="none";
+   }
+  },800);
+ }
 }
 
 document.querySelectorAll("[data-m]").forEach(btn=>{
  const k=btn.dataset.m;
+
  btn.addEventListener("pointerdown",e=>{
-  e.preventDefault();teclas[k]=true;
+  e.preventDefault();
+  teclas[k]=true;
   try{btn.setPointerCapture(e.pointerId)}catch(_){}
  });
- ["pointerup","pointercancel","lostpointercapture"].forEach(ev=>
-  btn.addEventListener(ev,e=>{teclas[k]=false;})
- );
+
+ ["pointerup","pointercancel","lostpointercapture"].forEach(ev=>{
+  btn.addEventListener(ev,()=>{teclas[k]=false;});
+ });
 });
+
 atacar.addEventListener("pointerdown",e=>{
- e.preventDefault();atacarAgora();
+ e.preventDefault();
+ atacarAgora();
 });
+
 addEventListener("keydown",e=>{
  const k=e.key.toLowerCase();
  if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(k))e.preventDefault();
+
  if(k==="arrowup")teclas.cima=true;
  if(k==="arrowdown")teclas.baixo=true;
  if(k==="arrowleft")teclas.esquerda=true;
  if(k==="arrowright")teclas.direita=true;
  teclas[k]=true;
+
  if(k===" ")atacarAgora();
 });
+
 addEventListener("keyup",e=>{
  const k=e.key.toLowerCase();
  if(k==="arrowup")teclas.cima=false;
@@ -331,6 +374,7 @@ addEventListener("keyup",e=>{
  if(k==="arrowright")teclas.direita=false;
  teclas[k]=false;
 });
+
 reiniciar.addEventListener("click",iniciar);
 
 function loop(){
@@ -339,6 +383,7 @@ function loop(){
  desenhar();
  requestAnimationFrame(loop);
 }
+
 iniciar();
 loop();
 })();
