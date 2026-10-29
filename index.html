@@ -3,321 +3,575 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>NexusBlatter</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#101c25;font-family:Arial;color:white;touch-action:none}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#87b8d0;font-family:Arial,sans-serif;touch-action:none}
 canvas{display:block}
-#hud{position:fixed;top:10px;left:10px;z-index:5;background:#101c25cc;padding:10px;border-radius:10px;font-size:14px}
-#barra{width:155px;height:13px;background:#555;border-radius:8px;overflow:hidden;margin-top:5px}
-#vida{height:100%;width:100%;background:#28e34e}
-#aviso{position:fixed;top:42%;left:5%;width:90%;text-align:center;font-size:25px;font-weight:bold;text-shadow:2px 2px #000;pointer-events:none;z-index:8}
-#reiniciar{display:none;position:fixed;z-index:10;top:57%;left:50%;transform:translateX(-50%);padding:15px 24px;border:0;border-radius:12px;background:#18c95b;color:white;font-weight:bold;font-size:17px}
-#controles{position:fixed;bottom:18px;left:15px;display:grid;grid-template-columns:52px 52px 52px;grid-template-rows:52px 52px;gap:5px;z-index:6}
-.ctrl{border:1px solid #ffffff88;background:#172a35cc;color:white;border-radius:13px;font-size:23px;touch-action:none}
-#up{grid-column:2}#left{grid-column:1;grid-row:2}#down{grid-column:2;grid-row:2}#right{grid-column:3;grid-row:2}
-#acoes{position:fixed;right:18px;bottom:30px;display:flex;flex-direction:column;gap:12px;z-index:6}
-.acao{width:76px;height:68px;border-radius:50%;border:2px solid #ffffff99;background:#c52a25dd;color:white;font-size:15px;font-weight:bold;touch-action:none}
-#camera{background:#245daadd}
-#dica{position:fixed;bottom:3px;left:5px;font-size:10px;color:#ddd;z-index:5}
+#hud{position:fixed;top:10px;left:10px;color:white;z-index:5;text-shadow:1px 2px 3px #000;font-weight:bold}
+#barra{width:165px;height:16px;background:#333;border:2px solid white;border-radius:5px;overflow:hidden;margin-top:5px}
+#vida{width:100%;height:100%;background:#24e34b}
+#info{margin-top:7px;font-size:14px}
+#ajuda{margin-top:5px;font-size:12px}
+#mira{position:fixed;left:50%;top:50%;color:white;font-size:25px;transform:translate(-50%,-50%);z-index:3;text-shadow:1px 1px 3px black;pointer-events:none}
+#controles{position:fixed;inset:0;z-index:6;pointer-events:none}
+.grupo{position:absolute;bottom:20px;display:grid;gap:7px;pointer-events:auto}
+#mov{left:15px;grid-template-columns:53px 53px 53px;grid-template-rows:53px 53px}
+#mov button,#acoes button{background:#172b38c9;color:white;border:2px solid #ffffffa0;border-radius:13px;font-weight:bold;font-size:21px;touch-action:none;user-select:none}
+#cima{grid-column:2}
+#esquerda{grid-column:1;grid-row:2}
+#baixo{grid-column:2;grid-row:2}
+#direita{grid-column:3;grid-row:2}
+#acoes{right:15px;display:flex;flex-direction:column;align-items:center;gap:12px}
+#acoes button{width:76px;height:65px;font-size:15px}
+#atirar{background:#9b3026e8!important}
+#mensagem{display:none;position:fixed;z-index:10;inset:0;background:#07131de8;color:white;align-items:center;justify-content:center;text-align:center;padding:20px}
+#cartao{max-width:350px;width:100%;background:#17303d;border:2px solid #75d9ff;border-radius:20px;padding:27px 20px;box-shadow:0 0 25px #000}
+#titulo{font-size:34px;font-weight:bold;margin-bottom:12px;color:#7ce4ff}
+#subtitulo{font-size:16px;line-height:1.6;margin-bottom:22px}
+#reiniciar{background:#17a75b;color:white;border:0;border-radius:12px;padding:15px 22px;font-size:17px;font-weight:bold;width:100%}
+#aviso{position:fixed;top:10px;right:10px;color:white;background:#172b38b8;padding:7px;border-radius:8px;font-size:12px;z-index:4}
 </style>
 </head>
 <body>
+
 <div id="hud">
- <b>⚔ NEXUSBLATTER</b>
- <div id="status">Pontos: 0 | Inimigos: 5</div>
- <div id="barra"><div id="vida"></div></div>
- <div id="vidaTexto">Vida: 100</div>
+  <div>NEXUSBLATTER</div>
+  <div id="barra"><div id="vida"></div></div>
+  <div id="info">Pontos: 0 | Inimigos: 8</div>
+  <div id="ajuda">Derrote todos os inimigos!</div>
 </div>
-<div id="aviso"></div>
-<button id="reiniciar">JOGAR NOVAMENTE</button>
+
+<div id="aviso">ARMA: BLASTER</div>
+<div id="mira">+</div>
+
 <div id="controles">
- <button class="ctrl" id="up" data-m="forward">▲</button>
- <button class="ctrl" id="left" data-m="left">◀</button>
- <button class="ctrl" id="down" data-m="back">▼</button>
- <button class="ctrl" id="right" data-m="right">▶</button>
+  <div id="mov" class="grupo">
+    <button id="cima">▲</button>
+    <button id="esquerda">◀</button>
+    <button id="baixo">▼</button>
+    <button id="direita">▶</button>
+  </div>
+  <div id="acoes" class="grupo">
+    <button id="atirar">🎯<br>ATIRAR</button>
+    <button id="correr">🏃<br>CORRER</button>
+  </div>
 </div>
-<div id="acoes">
- <button class="acao" id="atirar">🔥<br>ATIRAR</button>
- <button class="acao" id="camera">↻<br>GIRAR</button>
+
+<div id="mensagem">
+  <div id="cartao">
+    <div id="titulo">NEXUSBLATTER</div>
+    <div id="subtitulo">Prepare-se para a batalha!</div>
+    <button id="reiniciar">JOGAR NOVAMENTE</button>
+  </div>
 </div>
-<div id="dica">Setas: mover • GIRAR: virar a câmera • ATIRAR: atacar</div>
 
-<script type="module">
-import * as THREE from
-'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+(function(){
+"use strict";
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x87c9ed);
-scene.fog = new THREE.Fog(0x87c9ed, 45, 125);
+const $ = id => document.getElementById(id);
 
-const camera = new THREE.PerspectiveCamera(
- 65, innerWidth/innerHeight, 0.1, 300
-);
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-document.body.prepend(renderer.domElement);
-
-scene.add(new THREE.HemisphereLight(0xffffff,0x52643b,2));
-const sol = new THREE.DirectionalLight(0xffffff,2.2);
-sol.position.set(25,40,20);
-sol.castShadow = true;
-scene.add(sol);
-
-const material=(color)=>new THREE.MeshStandardMaterial({color});
-const verde=material(0x478c42);
-const chao=new THREE.Mesh(new THREE.PlaneGeometry(220,220),verde);
-chao.rotation.x=-Math.PI/2;
-chao.receiveShadow=true;
-scene.add(chao);
-
-const grade=new THREE.GridHelper(220,55,0x75a65b,0x75a65b);
-grade.position.y=.02;
-scene.add(grade);
-
-function caixa(w,h,d,color,x,y,z){
- const obj=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material(color));
- obj.position.set(x,y,z);
- obj.castShadow=true;
- obj.receiveShadow=true;
- scene.add(obj);
- return obj;
+if(!window.THREE){
+  $("titulo").textContent="ERRO AO CARREGAR";
+  $("subtitulo").textContent="Verifique sua internet e recarregue a página.";
+  $("mensagem").style.display="flex";
+  return;
 }
-function arvore(x,z){
- caixa(.45,2,.45,0x68432b,x,1,z);
- const copa=new THREE.Mesh(new THREE.SphereGeometry(1.5,8,7),material(0x176b32));
- copa.position.set(x,3,z);
- copa.castShadow=true;
- scene.add(copa);
-}
-function casa(x,z){
- caixa(7,3.5,6,0xc5a477,x,1.75,z);
- const telhado=new THREE.Mesh(
-  new THREE.ConeGeometry(5.3,2.8,4),
-  material(0x913c32)
- );
- telhado.position.set(x,4.8,z);
- telhado.rotation.y=Math.PI/4;
- telhado.castShadow=true;
- scene.add(telhado);
- caixa(1.3,2,.12,0x49301d,x,1,z-3.06);
- caixa(1.4,1.1,.15,0x70c9e8,x-2,2,z-3.08);
- caixa(1.4,1.1,.15,0x70c9e8,x+2,2,z-3.08);
-}
-for(let i=0;i<65;i++){
- let x=(Math.random()-.5)*180;
- let z=(Math.random()-.5)*180;
- if(Math.abs(x)<12&&Math.abs(z)<12)continue;
- arvore(x,z);
-}
-[[-22,-18],[22,-25],[-32,20],[30,28],[0,-38]].forEach(p=>casa(p[0],p[1]));
 
-const jogador=new THREE.Group();
-scene.add(jogador);
-const corpo=new THREE.Mesh(
- new THREE.CapsuleGeometry(.55,1.1,4,8),
- material(0x1767dd)
-);
-corpo.position.y=1.25;
-corpo.castShadow=true;
-jogador.add(corpo);
-const cabeca=new THREE.Mesh(
- new THREE.SphereGeometry(.38,12,10),
- material(0xf0c49b)
-);
-cabeca.position.y=2.25;
-jogador.add(cabeca);
-const arma=caixa(.22,.22,1.05,0x222831,0,1.5,0);
-arma.parent.remove(arma);
-jogador.add(arma);
-arma.position.set(.55,1.5,-.65);
+let cena, camera, renderizador, relogio;
+let jogador, inimigos=[], balas=[], obstaculos=[];
+let pontos=0, vida=100, acabou=false, venceu=false;
+let tempoTiro=0, invulneravel=0, animacao;
+let correndo=false;
+let teclas={cima:false,baixo:false,esquerda:false,direita:false};
+const MAPA=180;
+const velocidade=10;
+const relogioJogo=new THREE.Clock();
+const vetor=new THREE.Vector3();
+const direcao=new THREE.Vector3();
+const raycaster=new THREE.Raycaster();
 
-const inimigos=[];
+function material(cor){
+  return new THREE.MeshStandardMaterial({color:cor,roughness:0.9});
+}
+function caixa(w,h,d,cor,x,y,z){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material(cor));
+  m.position.set(x,y,z);
+  m.castShadow=true;
+  m.receiveShadow=true;
+  cena.add(m);
+  return m;
+}
+function esfera(r,cor,x,y,z){
+  const m=new THREE.Mesh(new THREE.SphereGeometry(r,12,10),material(cor));
+  m.position.set(x,y,z);
+  m.castShadow=true;
+  cena.add(m);
+  return m;
+}
+
+function iniciar(){
+  if(animacao)cancelAnimationFrame(animacao);
+
+  $("mensagem").style.display="none";
+  $("controles").style.display="block";
+  $("mira").style.display="block";
+
+  pontos=0; vida=100; acabou=false; venceu=false;
+  tempoTiro=0; invulneravel=0;
+  inimigos=[]; balas=[]; obstaculos=[];
+  teclas={cima:false,baixo:false,esquerda:false,direita:false};
+
+  cena=new THREE.Scene();
+  cena.background=new THREE.Color(0x8ac6e6);
+  cena.fog=new THREE.Fog(0x8ac6e6,70,175);
+
+  camera=new THREE.PerspectiveCamera(
+    65,innerWidth/innerHeight,0.1,300
+  );
+
+  renderizador=new THREE.WebGLRenderer({
+    antialias:true, powerPreference:"high-performance"
+  });
+  renderizador.setPixelRatio(Math.min(devicePixelRatio,1.5));
+  renderizador.setSize(innerWidth,innerHeight);
+  renderizador.shadowMap.enabled=false;
+  renderizador.outputColorSpace=THREE.SRGBColorSpace;
+
+  document.body.insertBefore(
+    renderizador.domElement,
+    $("hud")
+  );
+
+  cena.add(new THREE.HemisphereLight(0xe5f5ff,0x52663d,2));
+  const sol=new THREE.DirectionalLight(0xffffff,2.2);
+  sol.position.set(35,60,25);
+  cena.add(sol);
+
+  const chao=new THREE.Mesh(
+    new THREE.PlaneGeometry(MAPA,MAPA),
+    material(0x559447)
+  );
+  chao.rotation.x=-Math.PI/2;
+  chao.position.y=-0.08;
+  cena.add(chao);
+
+  // Caminhos do mapa
+  caixa(12,0.04,MAPA,0xb4a184,0,0,-8);
+  caixa(MAPA,0.04,9,0xb4a184,0,0,18);
+
+  // Grade discreta
+  const pontosGrade=[];
+  for(let i=-MAPA/2;i<=MAPA/2;i+=10){
+    pontosGrade.push(-MAPA/2,0,-i,MAPA/2,0,-i);
+    pontosGrade.push(i,0,-MAPA/2,i,0,MAPA/2);
+  }
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute("position",
+    new THREE.Float32BufferAttribute(pontosGrade,3));
+  cena.add(new THREE.LineSegments(
+    geo,new THREE.LineBasicMaterial({color:0x75ad5b,transparent:true,opacity:0.3})
+  ));
+
+  // Casas
+  for(let i=0;i<17;i++){
+    const x=(Math.random()-.5)*145;
+    const z=(Math.random()-.5)*145;
+    if(Math.hypot(x,z)<19)continue;
+    if(Math.abs(x)<10||Math.abs(z)<10)continue;
+    criarCasa(x,z);
+  }
+
+  // Árvores
+  for(let i=0;i<100;i++){
+    const x=(Math.random()-.5)*165;
+    const z=(Math.random()-.5)*165;
+    if(Math.hypot(x,z)<13)continue;
+    if(Math.abs(x)<8||Math.abs(z)<7)continue;
+    criarArvore(x,z);
+  }
+
+  // Personagem original
+  jogador=new THREE.Group();
+  const corpo=new THREE.Mesh(
+    new THREE.CylinderGeometry(.48,.62,1.35,10),
+    material(0x1768a8)
+  );
+  corpo.position.y=1.05;
+  jogador.add(corpo);
+
+  const cabeca=new THREE.Mesh(
+    new THREE.SphereGeometry(.37,12,10),
+    material(0xe0b18b)
+  );
+  cabeca.position.y=2;
+  jogador.add(cabeca);
+
+  const capacete=new THREE.Mesh(
+    new THREE.SphereGeometry(.39,12,8,0,Math.PI*2,0,Math.PI/2),
+    material(0x263847)
+  );
+  capacete.position.y=2.15;
+  jogador.add(capacete);
+
+  const arma=new THREE.Mesh(
+    new THREE.BoxGeometry(.2,.2,1),
+    material(0x24282d)
+  );
+  arma.position.set(.45,1.35,-.5);
+  jogador.add(arma);
+
+  cena.add(jogador);
+  jogador.position.set(0,0,0);
+
+  // Oito inimigos
+  for(let i=0;i<8;i++){
+    let x,z;
+    do{
+      x=(Math.random()-.5)*130;
+      z=(Math.random()-.5)*130;
+    }while(Math.hypot(x,z)<25);
+    criarInimigo(x,z);
+  }
+
+  atualizarHUD();
+  camera.position.set(0,7,10);
+  camera.lookAt(jogador.position);
+  relogioJogo.start();
+  animacao=requestAnimationFrame(loop);
+}
+
+function criarCasa(x,z){
+  const w=5+Math.random()*5;
+  const d=5+Math.random()*5;
+  const cores=[0xc9b18a,0xb9c6cc,0xd6a47a,0xb9b5a4];
+  const casa=new THREE.Group();
+
+  const paredes=new THREE.Mesh(
+    new THREE.BoxGeometry(w,3.3,d),
+    material(cores[Math.floor(Math.random()*cores.length)])
+  );
+  paredes.position.y=1.65;
+  casa.add(paredes);
+
+  const telhado=new THREE.Mesh(
+    new THREE.ConeGeometry(Math.max(w,d)*.78,2.4,4),
+    material(0x853d32)
+  );
+  telhado.position.y=4.1;
+  telhado.rotation.y=Math.PI/4;
+  casa.add(telhado);
+
+  casa.position.set(x,0,z);
+  cena.add(casa);
+  obstaculos.push({x,z,raio:Math.max(w,d)*.65});
+}
+
+function criarArvore(x,z){
+  const arvore=new THREE.Group();
+  const tronco=new THREE.Mesh(
+    new THREE.CylinderGeometry(.22,.35,2,7),
+    material(0x79502d)
+  );
+  tronco.position.y=1;
+  arvore.add(tronco);
+
+  const copa=new THREE.Mesh(
+    new THREE.ConeGeometry(1.5,3.4,8),
+    material(0x176d37)
+  );
+  copa.position.y=3.2;
+  arvore.add(copa);
+  arvore.position.set(x,0,z);
+  cena.add(arvore);
+  obstaculos.push({x,z,raio:1.1});
+}
+
 function criarInimigo(x,z){
- const g=new THREE.Group();
- const roupa=material(0xb52e2e);
- const c=new THREE.Mesh(new THREE.CapsuleGeometry(.55,1,4,8),roupa);
- c.position.y=1.1;
- c.castShadow=true;
- g.add(c);
- const h=new THREE.Mesh(new THREE.SphereGeometry(.36,10,8),material(0xd7a47b));
- h.position.y=2;
- g.add(h);
- g.position.set(x,0,z);
- scene.add(g);
- inimigos.push({g,vida:3,ataque:0});
-}
-for(let i=0;i<5;i++){
- let x,z;
- do{
-  x=(Math.random()-.5)*90;
-  z=(Math.random()-.5)*90;
- }while(Math.hypot(x,z)<18);
- criarInimigo(x,z);
-}
+  const grupo=new THREE.Group();
 
-const teclas={};
-let vida=100,pontos=0,acabou=false;
-let direcaoCamera=0,tempoTiro=0,flashAte=0;
-const status=document.getElementById('status');
-const barra=document.getElementById('vida');
-const vidaTexto=document.getElementById('vidaTexto');
-const aviso=document.getElementById('aviso');
-const reiniciar=document.getElementById('reiniciar');
+  const corpo=new THREE.Mesh(
+    new THREE.CylinderGeometry(.42,.55,1.3,9),
+    material(0xb82d32)
+  );
+  corpo.position.y=1;
+  grupo.add(corpo);
+
+  const cabeca=new THREE.Mesh(
+    new THREE.SphereGeometry(.32,10,8),
+    material(0xb98c6c)
+  );
+  cabeca.position.y=1.9;
+  grupo.add(cabeca);
+
+  const arma=new THREE.Mesh(
+    new THREE.BoxGeometry(.17,.17,.75),
+    material(0x202020)
+  );
+  arma.position.set(.4,1.2,-.35);
+  grupo.add(arma);
+
+  grupo.position.set(x,0,z);
+  cena.add(grupo);
+  inimigos.push({obj:grupo,vida:3,ataque:0,vel:1.6+Math.random()*.5});
+}
 
 function atualizarHUD(){
- status.textContent=`Pontos: ${pontos} | Inimigos: ${inimigos.length}`;
- barra.style.width=vida+'%';
- vidaTexto.textContent='Vida: '+Math.ceil(vida);
+  $("vida").style.width=Math.max(0,vida)+"%";
+  $("info").textContent="Pontos: "+pontos+" | Inimigos: "+inimigos.length;
 }
-function terminar(vitoria){
- acabou=true;
- aviso.textContent=vitoria?'🏆 VITÓRIA! VOCÊ VENCEU!':'💥 FIM DE JOGO!';
- reiniciar.style.display='block';
-}
-reiniciar.addEventListener('click',()=>location.reload());
 
-function pressionar(botao,chave){
- const b=document.getElementById(botao);
- const inicio=e=>{e.preventDefault();teclas[chave]=true;};
- const fim=e=>{e.preventDefault();teclas[chave]=false;};
- b.addEventListener('pointerdown',inicio);
- b.addEventListener('pointerup',fim);
- b.addEventListener('pointercancel',fim);
- b.addEventListener('pointerleave',fim);
+function colisao(x,z,raio){
+  if(Math.abs(x)>MAPA/2-3||Math.abs(z)>MAPA/2-3)return true;
+  for(const o of obstaculos){
+    if(Math.hypot(x-o.x,z-o.z)<raio+o.raio)return true;
+  }
+  return false;
 }
-pressionar('up','forward');
-pressionar('down','back');
-pressionar('left','left');
-pressionar('right','right');
 
-addEventListener('keydown',e=>{
- if(['ArrowUp','w','W'].includes(e.key))teclas.forward=true;
- if(['ArrowDown','s','S'].includes(e.key))teclas.back=true;
- if(['ArrowLeft','a','A'].includes(e.key))teclas.left=true;
- if(['ArrowRight','d','D'].includes(e.key))teclas.right=true;
- if(e.code==='Space')atirar();
-});
-addEventListener('keyup',e=>{
- if(['ArrowUp','w','W'].includes(e.key))teclas.forward=false;
- if(['ArrowDown','s','S'].includes(e.key))teclas.back=false;
- if(['ArrowLeft','a','A'].includes(e.key))teclas.left=false;
- if(['ArrowRight','d','D'].includes(e.key))teclas.right=false;
-});
-document.getElementById('camera').addEventListener('pointerdown',e=>{
- e.preventDefault();direcaoCamera+=Math.PI/5;
-});
+function moverJogador(dt){
+  let x=0,z=0;
+  if(teclas.cima)x-=1;
+  if(teclas.baixo)x+=1;
+  if(teclas.esquerda)z-=1;
+  if(teclas.direita)z+=1;
+
+  // Movimento relativo ao personagem/câmera
+  let frente=0,lado=0;
+  if(teclas.cima)frente=1;
+  if(teclas.baixo)frente=-1;
+  if(teclas.esquerda)lado=-1;
+  if(teclas.direita)lado=1;
+
+  if(!frente&&!lado)return;
+
+  const ang=camera.rotation.y;
+  const dx=Math.sin(ang)*frente+Math.cos(ang)*lado;
+  const dz=-Math.cos(ang)*frente+Math.sin(ang)*lado;
+  const comprimento=Math.hypot(dx,dz)||1;
+  const passo=velocidade*(correndo?1.45:1)*dt;
+
+  const nx=jogador.position.x+dx/comprimento*passo;
+  const nz=jogador.position.z+dz/comprimento*passo;
+
+  if(!colisao(nx,jogador.position.z,.8))jogador.position.x=nx;
+  if(!colisao(jogador.position.x,nz,.8))jogador.position.z=nz;
+
+  jogador.rotation.y=Math.atan2(-dx,-dz);
+}
 
 function atirar(){
- if(acabou||performance.now()-tempoTiro<350)return;
- tempoTiro=performance.now();
- flashAte=performance.now()+100;
- arma.material.color.set(0xffd447);
- setTimeout(()=>arma.material.color.set(0x222831),110);
+  if(acabou||!jogador||tempoTiro>0)return;
+  tempoTiro=.32;
 
- // Mira nos inimigos mais próximos da direção para a qual o jogador olha.
- let alvo=null,melhor=12;
- const frente=new THREE.Vector3(0,0,-1);
- frente.applyQuaternion(jogador.quaternion);
- for(const inimigo of inimigos){
-  const delta=inimigo.g.position.clone().sub(jogador.position);
-  const distancia=delta.length();
-  delta.y=0;
-  if(distancia>12||distancia<.1)continue;
-  delta.normalize();
-  const alinhamento=frente.dot(delta);
-  if(alinhamento>.72&&distancia<melhor){
-   melhor=distancia;alvo=inimigo;
+  let alvo=null,menor=36;
+  for(const e of inimigos){
+    const d=e.obj.position.distanceTo(jogador.position);
+    if(d<menor){menor=d;alvo=e;}
   }
- }
- if(alvo){
-  alvo.vida--;
-  alvo.g.scale.setScalar(.92);
-  setTimeout(()=>{if(alvo.g.parent)alvo.g.scale.setScalar(1)},90);
-  if(alvo.vida<=0){
-   scene.remove(alvo.g);
-   inimigos.splice(inimigos.indexOf(alvo),1);
-   pontos+=100;
-   if(inimigos.length===0)terminar(true);
+
+  // Projétil segue o inimigo mais próximo
+  let dir=new THREE.Vector3(0,0,-1);
+  if(alvo){
+    dir.subVectors(alvo.obj.position,jogador.position);
+    dir.y=0;
+    dir.normalize();
+  }else{
+    dir.set(
+      -Math.sin(jogador.rotation.y),
+      0,
+      -Math.cos(jogador.rotation.y)
+    ).normalize();
   }
- }else{
-  // O tiro não acerta automaticamente inimigos distantes ou atrás do jogador.
- }
- atualizarHUD();
+
+  const origem=jogador.position.clone();
+  origem.y=1.35;
+  origem.add(dir.clone().multiplyScalar(1.1));
+
+  const bala=new THREE.Mesh(
+    new THREE.SphereGeometry(.16,8,8),
+    new THREE.MeshBasicMaterial({color:0x66f6ff})
+  );
+  bala.position.copy(origem);
+  cena.add(bala);
+  balas.push({obj:bala,dir:dir,vida:1.5});
 }
-document.getElementById('atirar').addEventListener('pointerdown',e=>{
- e.preventDefault();atirar();
-});
 
-let ultimo=performance.now();
-function animar(agora){
- requestAnimationFrame(animar);
- const dt=Math.min((agora-ultimo)/1000,.04);
- ultimo=agora;
- if(!acabou){
-  let mx=0,mz=0;
-  if(teclas.forward)mz-=1;
-  if(teclas.back)mz+=1;
-  if(teclas.left)mx-=1;
-  if(teclas.right)mx+=1;
-  const comprimento=Math.hypot(mx,mz);
-  if(comprimento>0){
-   mx/=comprimento;mz/=comprimento;
-   const ang=direcaoCamera;
-   const dx=mx*Math.cos(ang)+mz*Math.sin(ang);
-   const dz=-mx*Math.sin(ang)+mz*Math.cos(ang);
-   jogador.position.x+=dx*9*dt;
-   jogador.position.z+=dz*9*dt;
-   jogador.rotation.y=Math.atan2(-dx,-dz);
-  }
-  jogador.position.x=THREE.MathUtils.clamp(jogador.position.x,-100,100);
-  jogador.position.z=THREE.MathUtils.clamp(jogador.position.z,-100,100);
+function atualizarBalas(dt){
+  for(let i=balas.length-1;i>=0;i--){
+    const b=balas[i];
+    b.obj.position.addScaledVector(b.dir,38*dt);
+    b.vida-=dt;
+    let acertou=false;
 
-  for(const inimigo of inimigos){
-   const dx=jogador.position.x-inimigo.g.position.x;
-   const dz=jogador.position.z-inimigo.g.position.z;
-   const d=Math.hypot(dx,dz);
-   if(d>1.7&&d<42){
-    inimigo.g.position.x+=(dx/d)*2.1*dt;
-    inimigo.g.position.z+=(dz/d)*2.1*dt;
-    inimigo.g.rotation.y=Math.atan2(-dx,-dz);
-   }else if(d<=1.7){
-    inimigo.ataque-=dt;
-    if(inimigo.ataque<=0){
-     vida=Math.max(0,vida-5);
-     inimigo.ataque=1.1;
-     atualizarHUD();
-     if(vida<=0)terminar(false);
+    for(let j=inimigos.length-1;j>=0;j--){
+      const e=inimigos[j];
+      if(b.obj.position.distanceTo(
+        e.obj.position.clone().add(new THREE.Vector3(0,1,0))
+      )<1.25){
+        e.vida--;
+        acertou=true;
+        if(e.vida<=0){
+          cena.remove(e.obj);
+          inimigos.splice(j,1);
+          pontos+=100;
+        }
+        break;
+      }
     }
-   }
+
+    if(acertou||b.vida<=0){
+      cena.remove(b.obj);
+      balas.splice(i,1);
+    }
   }
- }
-
- // Câmera de terceira pessoa atrás do personagem.
- const offset=new THREE.Vector3(
-  Math.sin(direcaoCamera)*10,6,Math.cos(direcaoCamera)*10
- );
- const destino=jogador.position.clone().add(offset);
- camera.position.lerp(destino,Math.min(1,dt*5));
- const olhar=jogador.position.clone().add(new THREE.Vector3(0,1.4,0));
- camera.lookAt(olhar);
- renderer.render(scene,camera);
 }
-atualizarHUD();
-requestAnimationFrame(animar);
 
-addEventListener('resize',()=>{
- camera.aspect=innerWidth/innerHeight;
- camera.updateProjectionMatrix();
- renderer.setSize(innerWidth,innerHeight);
+function atualizarInimigos(dt){
+  for(const e of inimigos){
+    const dx=jogador.position.x-e.obj.position.x;
+    const dz=jogador.position.z-e.obj.position.z;
+    const d=Math.hypot(dx,dz);
+
+    if(d>1.6){
+      const nx=e.obj.position.x+dx/(d||1)*e.vel*dt;
+      const nz=e.obj.position.z+dz/(d||1)*e.vel*dt;
+
+      if(!colisao(nx,e.obj.position.z,.65))e.obj.position.x=nx;
+      if(!colisao(e.obj.position.x,nz,.65))e.obj.position.z=nz;
+
+      e.obj.rotation.y=Math.atan2(-dx,-dz);
+    }else if(e.ataque<=0&&invulneravel<=0){
+      vida-=5;
+      e.ataque=1.25;
+      invulneravel=.65;
+      atualizarHUD();
+      if(vida<=0){
+        vida=0;
+        terminar(false);
+        return;
+      }
+    }
+    e.ataque-=dt;
+  }
+}
+
+function terminar(vitoria){
+  if(acabou)return;
+  acabou=true;
+  venceu=vitoria;
+  $("mensagem").style.display="flex";
+  $("controles").style.display="none";
+  $("mira").style.display="none";
+
+  $("titulo").textContent=vitoria?"VITÓRIA!":"FIM DE JOGO";
+  $("subtitulo").textContent=vitoria
+    ?"Parabéns! Você derrotou todos os inimigos e venceu a batalha. Pontos: "+pontos
+    :"Sua vida acabou. Pontos: "+pontos+". Tente novamente!";
+  $("reiniciar").textContent="JOGAR NOVAMENTE";
+}
+
+function loop(){
+  if(acabou)return;
+  animacao=requestAnimationFrame(loop);
+
+  const dt=Math.min(relogioJogo.getDelta(),.04);
+  tempoTiro=Math.max(0,tempoTiro-dt);
+  invulneravel=Math.max(0,invulneravel-dt);
+
+  moverJogador(dt);
+  atualizarInimigos(dt);
+  atualizarBalas(dt);
+
+  if(acabou)return;
+  if(inimigos.length===0){
+    atualizarHUD();
+    terminar(true);
+    return;
+  }
+
+  // Câmera acompanha o jogador em terceira pessoa
+  const atras=new THREE.Vector3(
+    Math.sin(jogador.rotation.y)*8,
+    5.2,
+    Math.cos(jogador.rotation.y)*8
+  );
+  const destino=jogador.position.clone().add(atras);
+  camera.position.lerp(destino,Math.min(1,dt*4));
+  camera.lookAt(
+    jogador.position.x,
+    jogador.position.y+1.1,
+    jogador.position.z
+  );
+
+  atualizarHUD();
+  renderizador.render(cena,camera);
+}
+
+// Controles por toque: pressionar e segurar
+function configurarBotao(id,chave){
+  const b=$(id);
+  b.addEventListener("pointerdown",e=>{
+    e.preventDefault();
+    teclas[chave]=true;
+    try{b.setPointerCapture(e.pointerId)}catch(_){}
+  });
+  ["pointerup","pointercancel","lostpointercapture"].forEach(tipo=>{
+    b.addEventListener(tipo,e=>{
+      teclas[chave]=false;
+    });
+  });
+}
+configurarBotao("cima","cima");
+configurarBotao("baixo","baixo");
+configurarBotao("esquerda","esquerda");
+configurarBotao("direita","direita");
+
+$("atirar").addEventListener("pointerdown",e=>{
+  e.preventDefault();
+  atirar();
 });
+$("correr").addEventListener("pointerdown",e=>{
+  e.preventDefault();
+  correndo=true;
+});
+["pointerup","pointercancel","lostpointercapture"].forEach(tipo=>{
+  $("correr").addEventListener(tipo,()=>correndo=false);
+});
+
+window.addEventListener("keydown",e=>{
+  if(e.key==="ArrowUp"||e.key==="w")teclas.cima=true;
+  if(e.key==="ArrowDown"||e.key==="s")teclas.baixo=true;
+  if(e.key==="ArrowLeft"||e.key==="a")teclas.esquerda=true;
+  if(e.key==="ArrowRight"||e.key==="d")teclas.direita=true;
+  if(e.code==="Space")atirar();
+  if(e.shiftKey)correndo=true;
+});
+window.addEventListener("keyup",e=>{
+  if(e.key==="ArrowUp"||e.key==="w")teclas.cima=false;
+  if(e.key==="ArrowDown"||e.key==="s")teclas.baixo=false;
+  if(e.key==="ArrowLeft"||e.key==="a")teclas.esquerda=false;
+  if(e.key==="ArrowRight"||e.key==="d")teclas.direita=false;
+  if(e.shiftKey)correndo=false;
+});
+
+window.addEventListener("resize",()=>{
+  if(!camera||!renderizador)return;
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderizador.setSize(innerWidth,innerHeight);
+});
+
+$("reiniciar").addEventListener("click",iniciar);
+
+iniciar();
+})();
 </script>
 </body>
-</html>
+ </html>
 
 
 
