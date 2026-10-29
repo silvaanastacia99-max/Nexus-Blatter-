@@ -83,9 +83,6 @@ const weapons=[
  {name:"BLASTER",damage:2,rate:440,range:38,ammo:40}
 ];
 
-try{init();resetGame();animate();}
-catch(e){console.error(e);$("erro").style.display="block";}
-
 function init(){
  scene=new THREE.Scene();
  scene.background=new THREE.Color(0x8bc4e6);
@@ -122,7 +119,10 @@ function addBox(parent,w,h,d,color,x,y,z){
  m.castShadow=true;m.receiveShadow=true;
  parent.add(m);return m;
 }
-function createMap(){
+function createMap()try{init();resetGame();animate();}
+catch(e){console.error(e);$("erro").style.display="block";
+ setupControls();
+}
  const ground=new THREE.Mesh(new THREE.PlaneGeometry(WORLD,WORLD),
   new THREE.MeshStandardMaterial({color:0x588f42,roughness:1}));
  ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;world.add(ground);
