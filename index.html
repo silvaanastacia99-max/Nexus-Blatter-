@@ -445,10 +445,7 @@ function releaseLook(e){if(e.pointerId===lookPointer)lookPointer=null;}
 document.addEventListener("pointerup",releaseLook);
 document.addEventListener("pointercancel",releaseLook);
 
-$("atirar").addEventListener("pointerdown",e=>{e.preventDefault();shoot();});
-$("pular").addEventListener("click",()=>{
- if(!gameOver&&!jumping){jumping=true;vy=7.5;}
-});
+$("atirar").addEventListener("pointerdown",e=>{
 $("correr").addEventListener("pointerdown",e=>{e.preventDefault();running=true;});
 ["pointerup","pointercancel","lostpointercapture"].forEach(ev=>$("correr").addEventListener(ev,()=>running=false));
 $("trocar").addEventListener("click",()=>{
