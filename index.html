@@ -83,25 +83,6 @@ const weapons=[
  {name:"BLASTER",damage:2,rate:440,range:38,ammo:40}
 ];
 
-function init(){
- scene=new THREE.Scene();
- scene.background=new THREE.Color(0x8bc4e6);
- scene.fog=new THREE.Fog(0x8bc4e6,65,165);
- camera=new THREE.PerspectiveCamera(67,innerWidth/innerHeight,.1,260);
- renderer=new THREE.WebGLRenderer({antialias:true});
- renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
- renderer.setSize(innerWidth,innerHeight);
- renderer.shadowMap.enabled=true;
- renderer.shadowMap.type=THREE.PCFSoftShadowMap;
- document.body.insertBefore(renderer.domElement,document.body.firstChild);
- clock=new THREE.Clock();
- world=new THREE.Group();
- scene.add(world);
- scene.add(new THREE.HemisphereLight(0xdff4ff,0x506040,2));
- const sun=new THREE.DirectionalLight(0xffffff,2.2);
- sun.position.set(-35,65,25);
- sun.castShadow=true;
- sun.shadow.mapSize.set(1024,1024);
  scene.add(sun);
  createMap();
  window.addEventListener("resize",()=>{
