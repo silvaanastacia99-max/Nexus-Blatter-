@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -13,52 +14,66 @@ html,body{
  background:#101c25;font-family:Arial,sans-serif;
  touch-action:none
 }
-canvas{display:block}
-button{font-family:Arial;user-select:none;-webkit-user-select:none}
-
-#hud{
- position:fixed;top:12px;left:12px;color:white;
- z-index:5;font-weight:bold;text-shadow:1px 2px 3px #000;
- font-size:14px;pointer-events:none
+canvas{display:block;touch-action:none}
+button{
+ font-family:Arial,sans-serif;
+ user-select:none;-webkit-user-select:none;
+ -webkit-tap-highlight-color:transparent
 }
-#titulo{font-size:20px;color:#55ff9a;margin-bottom:7px}
+#hud{
+ position:fixed;top:10px;left:10px;
+ color:white;z-index:5;font-weight:bold;
+ text-shadow:1px 2px 3px #000;
+ font-size:13px;pointer-events:none
+}
+#titulo{font-size:20px;color:#55ff9a;margin-bottom:6px}
 #barra{
- width:180px;height:15px;background:#222;
+ width:165px;height:14px;background:#222;
  border:2px solid #aaa;border-radius:10px;
  overflow:hidden;margin:5px 0
 }
-#vida{height:100%;width:100%;background:#22df60;transition:width .15s}
+#vida{
+ height:100%;width:100%;
+ background:#22df60;transition:width .15s
+}
 #info,#mensagemTopo{margin-top:5px}
 #mensagemTopo{color:#ffe58b}
-
 #arma{
- position:fixed;right:12px;top:12px;z-index:5;
- color:white;background:#111c27e8;padding:10px;
- border-radius:10px;font-size:13px;pointer-events:none
+ position:fixed;right:10px;top:10px;z-index:5;
+ color:white;background:#111c27e8;
+ padding:9px;border-radius:10px;font-size:12px;
+ pointer-events:none
 }
 #mira{
  position:fixed;left:50%;top:47%;
  transform:translate(-50%,-50%);
- color:white;font-size:30px;z-index:4;
+ color:white;font-size:29px;z-index:4;
  text-shadow:0 0 6px black;pointer-events:none
 }
 #aviso{
- position:fixed;top:105px;left:50%;
+ position:fixed;top:100px;left:50%;
  transform:translateX(-50%);z-index:8;
- color:white;background:#111d;padding:10px 15px;
+ color:white;background:#111d;padding:10px 14px;
  border-radius:10px;display:none;text-align:center;
  font-weight:bold;pointer-events:none
 }
-#controles{position:fixed;inset:0;z-index:6;pointer-events:none}
-.grupo{position:absolute;bottom:23px;display:grid;gap:7px;pointer-events:auto}
+#controles{
+ position:fixed;inset:0;z-index:6;
+ pointer-events:none
+}
+.grupo{
+ position:absolute;bottom:23px;
+ display:grid;gap:7px;pointer-events:auto
+}
 #direcao{
- left:18px;grid-template-columns:58px 58px 58px;
- grid-template-rows:58px 58px
+ left:15px;
+ grid-template-columns:55px 55px 55px;
+ grid-template-rows:55px 55px
 }
 .ctrl{
  background:#101d2be8;color:white;
- border:2px solid #52616d;border-radius:17px;
- font-size:23px;font-weight:bold;
+ border:2px solid #52616d;border-radius:16px;
+ font-size:22px;font-weight:bold;
  touch-action:none;display:flex;
  align-items:center;justify-content:center;
  padding:0
@@ -71,27 +86,27 @@ button{font-family:Arial;user-select:none;-webkit-user-select:none}
 #baixo{grid-column:2;grid-row:2}
 #direita{grid-column:3;grid-row:2}
 #acoes{
- right:17px;bottom:28px;
- display:flex;flex-direction:column;gap:11px
+ right:14px;bottom:25px;
+ display:flex;flex-direction:column;gap:10px
 }
 .acao{
- width:85px;height:76px;border-radius:22px;
- font-size:15px;background:#a32424e8;
+ width:78px;height:72px;border-radius:20px;
+ font-size:14px;background:#a32424e8;
  border:3px solid #ff8585
 }
 #correr{
- height:55px;background:#174c83e8;
+ height:52px;background:#174c83e8;
  border-color:#75baff
 }
 #ajuda{
- position:fixed;bottom:5px;left:0;width:100%;
- text-align:center;color:white;font-size:10px;
+ position:fixed;bottom:3px;left:0;width:100%;
+ text-align:center;color:white;font-size:9px;
  text-shadow:1px 1px 3px #000;z-index:4;
  pointer-events:none
 }
 #telaFinal{
  display:none;position:fixed;inset:0;
- background:#061019e8;z-index:10;color:white;
+ background:#061019ed;z-index:10;color:white;
  align-items:center;justify-content:center;
  text-align:center;padding:20px
 }
@@ -110,11 +125,15 @@ button{font-family:Arial;user-select:none;-webkit-user-select:none}
 }
 #reiniciar:active{transform:translateY(3px)}
 @media(max-width:380px){
- #direcao{left:8px;grid-template-columns:49px 49px 49px;grid-template-rows:52px 52px}
- #acoes{right:8px}
- .acao{width:73px;height:68px}
- #hud{font-size:12px}
- #barra{width:150px}
+ #direcao{
+  left:7px;
+  grid-template-columns:47px 47px 47px;
+  grid-template-rows:49px 49px
+ }
+ #acoes{right:7px}
+ .acao{width:68px;height:64px}
+ #hud{font-size:11px}
+ #barra{width:140px}
 }
 </style>
 </head>
@@ -147,7 +166,7 @@ button{font-family:Arial;user-select:none;-webkit-user-select:none}
  </div>
 
  <div id="ajuda">
-  Explore o mapa, derrote os inimigos e fique dentro da zona segura!
+  Arraste a tela para mirar. Explore, lute e fique na zona segura!
  </div>
 </div>
 
@@ -172,11 +191,12 @@ let jogador=null,inimigos=[],obstaculos=[],efeitos=[];
 let pontos=0,vida=100,acabou=false;
 let tempoDisparo=0,tempoZona=0,tempoAviso=0;
 let raioZona=85,anelZona=null;
-let correndo=false;
+let correndo=false,tempoMira=0;
 let animacaoIniciada=false;
+let ultimaMiraX=0,arrastando=false;
 
 const TAM=190;
-const VELOCIDADE=13;
+const VELOCIDADE=11;
 const teclas={
  cima:false,baixo:false,esquerda:false,direita:false
 };
@@ -214,33 +234,43 @@ function cilindro(pai,x,y,z,r1,r2,h,cor,n=8){
 }
 
 function criarRenderer(){
+ if(!THREE.WebGLRenderer)
+  throw Error("Three.js não carregou.");
+
  renderer=new THREE.WebGLRenderer({
   antialias:false,
   powerPreference:"low-power"
  });
- renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));
+
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.3));
  renderer.setSize(innerWidth,innerHeight);
  renderer.setClearColor(0x8ac7eb);
  renderer.outputEncoding=THREE.sRGBEncoding;
- document.body.insertBefore(renderer.domElement,document.body.firstChild);
+ renderer.domElement.style.position="fixed";
+ renderer.domElement.style.inset="0";
+ renderer.domElement.style.zIndex="0";
+ document.body.insertBefore(
+  renderer.domElement,document.body.firstChild
+ );
 }
 
 function criarMundo(){
  scene=new THREE.Scene();
  scene.background=new THREE.Color(0x8ac7eb);
- scene.fog=new THREE.Fog(0x8ac7eb,110,260);
+ scene.fog=new THREE.Fog(0x8ac7eb,120,290);
 
  camera=new THREE.PerspectiveCamera(
   65,innerWidth/innerHeight,.1,450
  );
 
- scene.add(new THREE.HemisphereLight(0xe4f5ff,0x45613b,2));
+ scene.add(new THREE.HemisphereLight(
+  0xe4f5ff,0x45613b,2
+ ));
 
- const sol=new THREE.DirectionalLight(0xffffff,1.25);
+ const sol=new THREE.DirectionalLight(0xffffff,1.2);
  sol.position.set(30,60,20);
  scene.add(sol);
 
- // Terreno grande.
  const terreno=new THREE.Mesh(
   new THREE.PlaneGeometry(TAM*2,TAM*2),
   material(0x438747)
@@ -249,16 +279,19 @@ function criarMundo(){
  terreno.position.y=-.12;
  scene.add(terreno);
 
- const grade=new THREE.GridHelper(TAM*2,70,0x76ae65,0x61985a);
+ const grade=new THREE.GridHelper(
+  TAM*2,70,0x76ae65,0x61985a
+ );
  grade.position.y=-.08;
  scene.add(grade);
 
- // Estradas.
  bloco(scene,0,.01,0,13,.025,TAM*2,0xb5b19a);
  bloco(scene,0,.02,0,TAM*2,.03,12,0xb5b19a);
 
- // Zona segura.
- const geo=new THREE.RingGeometry(raioZona-.5,raioZona,128);
+ const geo=new THREE.RingGeometry(
+  raioZona-.5,raioZona,128
+ );
+
  anelZona=new THREE.Mesh(
   geo,
   new THREE.MeshBasicMaterial({
@@ -266,6 +299,7 @@ function criarMundo(){
    side:THREE.DoubleSide
   })
  );
+
  anelZona.rotation.x=-Math.PI/2;
  anelZona.position.y=.15;
  scene.add(anelZona);
@@ -290,7 +324,9 @@ function criarArvores(){
   cilindro(g,0,3.6,0,0,1.2,2.5,0x258347,7);
 
   scene.add(g);
-  obstaculos.push({x,z,rx:1.4,rz:1.4,tipo:"arvore"});
+  obstaculos.push({
+   x,z,rx:1.4,rz:1.4,tipo:"arvore"
+  });
  }
 }
 
@@ -327,7 +363,6 @@ function criarCasas(){
 function criarPersonagem(cor,heroi){
  const g=new THREE.Group();
 
- // Personagem original Nexus.
  bloco(g,0,1.35,0,.9,1.15,.5,cor);
  esfera(g,0,2.25,0,.42,0xd8a47e);
 
@@ -337,7 +372,6 @@ function criarPersonagem(cor,heroi){
  bloco(g,-.23,.48,0,.28,.85,.32,0x263547);
  bloco(g,.23,.48,0,.28,.85,.32,0x263547);
 
- // Rifle.
  bloco(g,.62,1.35,-.42,.18,.2,.95,0x252c35);
  bloco(g,.62,1.35,-.83,.12,.13,.4,0x999fa5);
 
@@ -374,8 +408,10 @@ function moverSeguro(obj,nx,nz,raio=.8){
 function iniciarJogador(){
  jogador={
   grupo:criarPersonagem(0x2457a6,true),
-  x:0,z:0,angulo:0,velocidade:VELOCIDADE
+  x:0,z:0,angulo:0,
+  velocidade:VELOCIDADE
  };
+
  jogador.grupo.position.set(0,0,0);
 }
 
@@ -399,11 +435,9 @@ function criarInimigos(){
   grupo.position.set(x,0,z);
 
   inimigos.push({
-   grupo,x,z,
-   vida:100,
-   velocidade:3+Math.random()*1.3,
-   ataque:0,
-   angulo:0,
+   grupo,x,z,vida:100,
+   velocidade:2.8+Math.random()*1.1,
+   ataque:0,angulo:0,
    movimento:Math.random()*5
   });
  }
@@ -424,7 +458,7 @@ function atualizarHUD(){
 function aviso(msg){
  $("aviso").textContent=msg;
  $("aviso").style.display="block";
- tempoAviso=1.5;
+ tempoAviso=1.2;
 }
 
 function encerrar(vitoria){
@@ -432,8 +466,13 @@ function encerrar(vitoria){
 
  acabou=true;
  correndo=false;
+ arrastando=false;
 
  Object.keys(teclas).forEach(k=>teclas[k]=false);
+
+ document.querySelectorAll(".pressionado").forEach(b=>
+  b.classList.remove("pressionado")
+ );
 
  $("controles").style.display="none";
  $("telaFinal").style.display="flex";
@@ -441,16 +480,20 @@ function encerrar(vitoria){
  $("resultado").textContent=vitoria?"VITÓRIA!":"FIM DE JOGO";
  $("resultado").style.color=vitoria?"#55ff83":"#ff5d5d";
 
- $("detalhe").innerHTML=
+ $("detalhe").textContent=
   (vitoria?
    "Você derrotou todos os inimigos!":
    "Sua missão terminou. Tente novamente!"
-  )+"<br>Pontuação: "+pontos;
+  )+" Pontuação: "+pontos;
 }
 
 function limparMundo(){
- if(renderer&&renderer.domElement)
-  renderer.domElement.remove();
+ if(renderer){
+  renderer.dispose();
+  if(renderer.domElement.parentNode)
+   renderer.domElement.remove();
+  renderer=null;
+ }
 
  if(scene){
   scene.traverse(obj=>{
@@ -463,6 +506,9 @@ function limparMundo(){
    }
   });
  }
+
+ scene=null;
+ camera=null;
 }
 
 function reiniciar(){
@@ -471,6 +517,8 @@ function reiniciar(){
  obstaculos=[];
  inimigos=[];
  efeitos=[];
+ jogador=null;
+ anelZona=null;
 
  pontos=0;
  vida=100;
@@ -480,6 +528,7 @@ function reiniciar(){
  tempoDisparo=0;
  tempoAviso=0;
  correndo=false;
+ tempoMira=0;
 
  Object.keys(teclas).forEach(k=>teclas[k]=false);
 
@@ -487,23 +536,31 @@ function reiniciar(){
  $("controles").style.display="block";
  $("aviso").style.display="none";
 
- criarRenderer();
- criarMundo();
- iniciarJogador();
- criarInimigos();
+ try{
+  criarRenderer();
+  criarMundo();
+  iniciarJogador();
+  criarInimigos();
 
- atualizarHUD();
- relogio=new THREE.Clock();
+  atualizarHUD();
+  relogio=new THREE.Clock();
+ }catch(e){
+  console.error(e);
+  $("controles").style.display="none";
+  $("aviso").textContent=
+   "Não foi possível iniciar. Verifique sua internet e tente novamente.";
+  $("aviso").style.display="block";
+ }
 }
 
 function atirar(){
- if(acabou||!jogador)return;
+ if(acabou||!jogador||!scene)return;
 
  const agora=performance.now();
- if(agora-tempoDisparo<280)return;
+ if(agora-tempoDisparo<350)return;
  tempoDisparo=agora;
 
- const alcance=65;
+ const alcance=70;
  let alvo=null;
  let menor=alcance;
 
@@ -514,17 +571,21 @@ function atirar(){
 
   if(dist<.1||dist>alcance)continue;
 
-  const frente=
-   (dx*Math.sin(jogador.angulo)+
-    dz*Math.cos(jogador.angulo))/dist;
+  const frente=(
+   dx*Math.sin(jogador.angulo)+
+   dz*Math.cos(jogador.angulo)
+  )/dist;
 
   const lateral=Math.abs(
    dx*Math.cos(jogador.angulo)-
    dz*Math.sin(jogador.angulo)
   );
 
-  // Mira assistida: facilita acertar no celular.
-  if(frente>.30&&lateral<Math.max(3.2,dist*.16)&&dist<menor){
+  if(
+   frente>.25&&
+   lateral<Math.max(3.5,dist*.15)&&
+   dist<menor
+  ){
    alvo=e;
    menor=dist;
   }
@@ -536,20 +597,23 @@ function atirar(){
 
  const fim=new THREE.Vector3(
   alvo?alvo.x:
-   jogador.x+Math.sin(jogador.angulo)*12,
+   jogador.x+Math.sin(jogador.angulo)*14,
   1.5,
   alvo?alvo.z:
-   jogador.z+Math.cos(jogador.angulo)*12
+   jogador.z+Math.cos(jogador.angulo)*14
  );
 
- const geo=new THREE.BufferGeometry().setFromPoints([origem,fim]);
+ const geo=new THREE.BufferGeometry().setFromPoints([
+  origem,fim
+ ]);
+
  const linha=new THREE.Line(
   geo,
   new THREE.LineBasicMaterial({color:0xffee83})
  );
 
  scene.add(linha);
- efeitos.push({obj:linha,tempo:.10});
+ efeitos.push({obj:linha,tempo:.12});
 
  if(alvo){
   alvo.vida-=50;
@@ -580,28 +644,35 @@ function atualizarInimigos(dt){
   e.grupo.rotation.y=e.angulo;
 
   if(dist>2.5){
-   // Perseguição inteligente.
-   let passo=e.velocidade*dt;
-
-   const nx=e.x+dx/dist*passo;
-   const nz=e.z+dz/dist*passo;
-
+   const passo=e.velocidade*dt;
    const antesX=e.x,antesZ=e.z;
-   moverSeguro(e,nx,nz,.8);
 
-   // Procura um caminho alternativo se encontrar obstáculo.
+   moverSeguro(
+    e,
+    e.x+dx/dist*passo,
+    e.z+dz/dist*passo,
+    .8
+   );
+
    if(e.x===antesX&&e.z===antesZ){
     const lado=e.angulo+Math.PI/2;
+    const lado2=e.angulo-Math.PI/2;
+
     moverSeguro(
-     e,
-     e.x+Math.sin(lado)*passo,
-     e.z+Math.cos(lado)*passo,
-     .8
+     e,e.x+Math.sin(lado)*passo,
+     e.z+Math.cos(lado)*passo,.8
     );
+
+    if(e.x===antesX&&e.z===antesZ){
+     moverSeguro(
+      e,e.x+Math.sin(lado2)*passo,
+      e.z+Math.cos(lado2)*passo,.8
+     );
+    }
    }
-  }else if(agora-e.ataque>1.4){
+  }else if(agora-e.ataque>1.7){
    e.ataque=agora;
-   vida=Math.max(0,vida-4);
+   vida=Math.max(0,vida-3);
    atualizarHUD();
 
    if(vida<=0){
@@ -618,7 +689,7 @@ function atualizarZona(dt){
  tempoZona+=dt;
 
  if(tempoZona>18&&raioZona>22){
-  raioZona=Math.max(22,raioZona-dt*1.15);
+  raioZona=Math.max(22,raioZona-dt*.9);
 
   if(anelZona){
    anelZona.geometry.dispose();
@@ -631,9 +702,10 @@ function atualizarZona(dt){
  const d=Math.hypot(jogador.x,jogador.z);
 
  if(d>raioZona){
-  vida=Math.max(0,vida-dt*5);
+  vida=Math.max(0,vida-dt*3);
 
-  $("mensagemTopo").textContent="⚠ FORA DA ZONA SEGURA!";
+  $("mensagemTopo").textContent=
+   "⚠ FORA DA ZONA SEGURA!";
   $("mensagemTopo").style.color="#ff6262";
 
   atualizarHUD();
@@ -662,7 +734,7 @@ function atualizarCamera(dt){
 }
 
 function atualizar(dt){
- if(acabou)return;
+ if(acabou||!jogador)return;
 
  let mx=0,mz=0;
 
@@ -677,10 +749,11 @@ function atualizar(dt){
   mx/=mag;
   mz/=mag;
 
-  jogador.angulo=Math.atan2(mx,mz);
+  if(tempoMira<=0)
+   jogador.angulo=Math.atan2(mx,mz);
 
   const velocidade=
-   jogador.velocidade*(correndo?1.7:1);
+   jogador.velocidade*(correndo?1.65:1);
 
   moverSeguro(
    jogador,
@@ -692,6 +765,9 @@ function atualizar(dt){
   jogador.grupo.rotation.y=jogador.angulo;
  }
 
+ tempoMira=Math.max(0,tempoMira-dt);
+
+ jogador.grupo.rotation.y=jogador.angulo;
  jogador.grupo.position.set(jogador.x,0,jogador.z);
 
  atualizarInimigos(dt);
@@ -702,7 +778,6 @@ function atualizar(dt){
 
  atualizarCamera(dt);
 
- // Limpa os efeitos dos disparos.
  for(let i=efeitos.length-1;i>=0;i--){
   efeitos[i].tempo-=dt;
 
@@ -737,7 +812,7 @@ function animar(){
  renderer.render(scene,camera);
 }
 
-// Controles do celular.
+// Controles direcionais.
 document.querySelectorAll("[data-m]").forEach(btn=>{
  const k=btn.dataset.m;
 
@@ -750,7 +825,6 @@ document.querySelectorAll("[data-m]").forEach(btn=>{
   e.preventDefault();
   teclas[k]=true;
   btn.classList.add("pressionado");
-
   try{btn.setPointerCapture(e.pointerId)}catch(_){}
  });
 
@@ -758,6 +832,44 @@ document.querySelectorAll("[data-m]").forEach(btn=>{
  btn.addEventListener("pointercancel",soltar);
  btn.addEventListener("lostpointercapture",soltar);
 });
+
+// Mirar arrastando a parte livre da tela.
+function iniciarMira(e){
+ if(acabou||!renderer)return;
+ arrastando=true;
+ ultimaMiraX=e.clientX;
+}
+
+function moverMira(e){
+ if(!arrastando||!jogador||acabou)return;
+
+ const delta=e.clientX-ultimaMiraX;
+ ultimaMiraX=e.clientX;
+
+ jogador.angulo-=delta*.009;
+ tempoMira=3;
+}
+
+function terminarMira(){
+ arrastando=false;
+}
+
+function ligarMira(){
+ if(!renderer)return;
+
+ renderer.domElement.addEventListener(
+  "pointerdown",iniciarMira
+ );
+ renderer.domElement.addEventListener(
+  "pointermove",moverMira
+ );
+ renderer.domElement.addEventListener(
+  "pointerup",terminarMira
+ );
+ renderer.domElement.addEventListener(
+  "pointercancel",terminarMira
+ );
+}
 
 // Atirar.
 $("atirar").addEventListener("pointerdown",e=>{
@@ -769,17 +881,18 @@ $("atirar").addEventListener("pointerdown",e=>{
 $("correr").addEventListener("pointerdown",e=>{
  e.preventDefault();
  correndo=true;
-
+ $("correr").classList.add("pressionado");
  try{$("correr").setPointerCapture(e.pointerId)}catch(_){}
 });
 
 ["pointerup","pointercancel","lostpointercapture"].forEach(ev=>{
  $("correr").addEventListener(ev,()=>{
   correndo=false;
+  $("correr").classList.remove("pressionado");
  });
 });
 
-// Teclado para testar no computador.
+// Teclado.
 window.addEventListener("keydown",e=>{
  const mapa={
   ArrowUp:"cima",w:"cima",
@@ -818,6 +931,7 @@ window.addEventListener("keyup",e=>{
 window.addEventListener("blur",()=>{
  Object.keys(teclas).forEach(k=>teclas[k]=false);
  correndo=false;
+ arrastando=false;
 });
 
 window.addEventListener("resize",()=>{
@@ -828,10 +942,13 @@ window.addEventListener("resize",()=>{
  renderer.setSize(innerWidth,innerHeight);
 });
 
-// Reiniciar partida.
-$("reiniciar").addEventListener("click",reiniciar);
+// Reiniciar.
+$("reiniciar").addEventListener("click",()=>{
+ reiniciar();
+ ligarMira();
+});
 
-// Iniciar jogo.
+// Inicialização.
 try{
  criarRenderer();
  criarMundo();
@@ -841,6 +958,8 @@ try{
  atualizarHUD();
  relogio=new THREE.Clock();
 
+ ligarMira();
+
  if(!animacaoIniciada){
   animacaoIniciada=true;
   animar();
@@ -848,14 +967,7 @@ try{
 }catch(e){
  console.error(e);
  $("aviso").textContent=
-  "Erro ao iniciar o jogo. Verifique sua conexão com a internet.";
- $("aviso").style.display="block";
-}
-
-})();
-</script>
-</body>
-  </html>
+  "Erro ao iniciar. Verifique sua conexão com a int
 
   
 
