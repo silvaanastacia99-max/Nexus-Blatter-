@@ -983,7 +983,33 @@ window.addEventListener("blur",()=>{
 
 // REDIMENSIONAR TELA.
 window.addEventListener("resize",()=>{
- if(!renderer||!c
+ if(!renderer||!camera)return;
+
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+
+ renderer.setSize(innerWidth,innerHeight);
+});
+
+// BOTÃO JOGAR NOVAMENTE.
+$("reiniciar").addEventListener("click",()=>{
+ reiniciar();
+});
+
+// INICIAR O NEXUSBLATTER.
+try{
+ reiniciar();
+ animar();
+}catch(e){
+ console.error(e);
+
+ $("carregando").style.display="flex";
+ $("carregando").textContent=
+  "ERRO AO INICIAR. RECARREGUE A PÁGINA.";
+}
+
+})();
+  
   
 
 
