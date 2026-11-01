@@ -515,7 +515,36 @@ reiniciar.addEventListener("click",()=>{
  iniciar.style.display="none";
  reiniciarJogo(
 
+reiniciar.addEventListener("click",()=>{
+  reiniciar.style.display="none";
+  mensagem.querySelector("h1").textContent="NEXUSBLATTER";
+  iniciar.style.display="none";
+  reiniciarJogo();
+});
+
 window.addEventListener("resize",()=>{
+  if(!camera||!renderer)return;
+
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+ 
+reiniciar.addEventListener("click",()=>{
+  reiniciar.style.display="none";
+  mensagem.querySelector("h1").textContent="NEXUSBLATTER";
+  iniciar.style.display="none";
+  reiniciarJogo();
+});
+
+window.addEventListener("resize",()=>{
+  if(!camera||!renderer)return;
+
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+ ("resize",()=>{
  if(!camera||!renderer)return;
  camera.aspect=innerWidth/innerHeight;
  camera.updateProjectionMatrix();
