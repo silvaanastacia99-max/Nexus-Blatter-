@@ -236,15 +236,14 @@ function iniciarCena(){
  sol.position.set(-30,50,30);
  sol.castShadow=true;
  sol.shadow.mapSize.set(1024,1024);
- cena.add(sol);
+ cena.add(sol);const luz=new THREE.HemisphereLight(0xffffff,0x38552d,0.9);
+cena.add(luz);
 
- const chao=new THREE.Mesh(
-  new THREE.PlaneGeometry(180,180),
-  material(0x315d2c)
- );
- chao.rotation.x=-Math.PI/2;
- chao.receiveShadow=true;
- cena.add(chao);
+const sol=new THREE.DirectionalLight(0xffffff,1.15);
+sol.position.set(-30,60,30);
+sol.castShadow=true;
+sol.shadow.mapSize.set(1024,1024);
+cena.add(sol);
 
  const estrada=new THREE.Mesh(
   new THREE.PlaneGeometry(13,180),
