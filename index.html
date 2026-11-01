@@ -24,53 +24,43 @@ canvas{display:block;width:100%;height:100%}
  width:180px;height:13px;background:#501b25;
  border:2px solid white;border-radius:10px;margin-top:8px
 }
-#vida{
- width:100%;height:100%;background:#28e34e;
- border-radius:10px;transition:width .2s
-}
+#vida{width:100%;height:100%;background:#28e34e;border-radius:10px}
 #ajuda{
  position:absolute;top:100px;left:12px;
  font-size:12px;text-shadow:1px 2px 3px black
 }
 #controles{
  position:absolute;bottom:18px;left:12px;right:12px;
- display:flex;justify-content:space-between;align-items:end;
+ display:flex;justify-content:space-between;align-items:end
 }
 #direcoes{
  display:grid;grid-template-columns:52px 52px 52px;
  grid-template-rows:52px 52px 52px;gap:5px
 }
 .controle{
- background:#142c38dd;border:2px solid #59eaff;
- color:white;border-radius:13px;
- font-size:23px;font-weight:bold;
- width:52px;height:52px;
- touch-action:none
+ background:#142c38ee;border:2px solid #59eaff;
+ color:white;border-radius:13px;font-size:23px;
+ font-weight:bold;width:52px;height:52px;touch-action:none
 }
 .controle:active{background:#168ba5}
 #cima{grid-column:2}
 #esquerda{grid-column:1;grid-row:2}
 #baixo{grid-column:2;grid-row:2}
 #direita{grid-column:3;grid-row:2}
-#acoes{display:flex;gap:10px;align-items:end}
 #atacar{
  width:76px;height:76px;border-radius:50%;
  background:#a62c25;border:3px solid #ffbd64;
- color:white;font-size:17px;font-weight:bold
+ color:white;font-size:16px;font-weight:bold
 }
 #mensagem{
  position:absolute;inset:0;background:#06121bea;
- display:flex;flex-direction:column;
- justify-content:center;align-items:center;
- text-align:center;padding:25px;
- z-index:5
+ display:flex;flex-direction:column;justify-content:center;
+ align-items:center;text-align:center;padding:25px;z-index:5
 }
 #mensagem h1{color:#56f5ff;font-size:35px}
-#mensagem p{max-width:300px;line-height:1.5}
 #reiniciar{
- display:none;padding:16px 28px;
- background:#12a9b8;color:white;
- border:2px solid white;border-radius:12px;
+ display:none;padding:16px 28px;background:#12a9b8;
+ color:white;border:2px solid white;border-radius:12px;
  font-size:18px;font-weight:bold
 }
 #estado{font-size:14px;color:#ffdc75}
@@ -83,7 +73,6 @@ canvas{display:block;width:100%;height:100%}
  <div id="info">Pontos: 0 | Inimigos: 8</div>
  <div id="vidaFundo"><div id="vida"></div></div>
 </div>
-
 <div id="ajuda">Explore o mapa e derrote os inimigos!</div>
 
 <div id="controles">
@@ -93,14 +82,12 @@ canvas{display:block;width:100%;height:100%}
   <button class="controle" id="baixo">▼</button>
   <button class="controle" id="direita">▶</button>
  </div>
- <div id="acoes">
-  <button class="controle" id="atacar">ATACAR</button>
- </div>
+ <button class="controle" id="atacar">ATACAR</button>
 </div>
 
 <div id="mensagem">
  <h1>NEXUSBLATTER</h1>
- <p>Prepare-se para explorar um mundo 3D e enfrentar seus desafios!</p>
+ <p>Explore um mundo 3D e enfrente seus desafios!</p>
  <button id="iniciar" class="controle" style="width:auto;padding:12px 25px;font-size:17px">ENTRAR NO JOGO</button>
  <p id="estado">Carregando gráficos 3D...</p>
  <button id="reiniciar">JOGAR NOVAMENTE</button>
@@ -110,7 +97,6 @@ canvas{display:block;width:100%;height:100%}
 <script>
 (()=>{
 "use strict";
-
 const $=id=>document.getElementById(id);
 const mensagem=$("mensagem");
 const estado=$("estado");
@@ -118,24 +104,21 @@ const iniciar=$("iniciar");
 const reiniciar=$("reiniciar");
 
 if(!window.THREE){
- estado.textContent="Não foi possível carregar o 3D. Verifique sua internet e atualize a página.";
+ estado.textContent="Erro ao carregar 3D. Verifique a internet.";
  iniciar.style.display="none";
  return;
 }
 
 let cena,camera,renderer,relogio;
-let jogador,enemies=[],objetos=[],efeitos=[];
+let jogador,enemies=[],teclas={};
 let pontos=0,vida=100,rodando=false;
 let ataqueTempo=0,invulneravel=0;
-let teclas={};
 let direcao=new THREE.Vector3();
 let alvoCamera=new THREE.Vector3();
 
-const TAMANHO=110;
-
-function material(cor){
+function material(cor,roughness=.95){
  return new THREE.MeshStandardMaterial({
-  color:cor,roughness:.85
+  color:cor,roughness,metalness:0
  });
 }
 
@@ -147,36 +130,31 @@ function criarCaixa(x,y,z,l,a,p,cor){
  mesh.castShadow=true;
  mesh.receiveShadow=true;
  cena.add(mesh);
- objetos.push(mesh);
  return mesh;
 }
 
 function criarArvore(x,z){
- const tronco=criarCaixa(x,1,z,.55,2,.55,0x70452b);
+ criarCaixa(x,1,z,.5,2,.5,0x54331e);
  const copa=new THREE.Mesh(
   new THREE.ConeGeometry(2,5,7),
-  material(0x167b39)
+  material(0x145326)
  );
  copa.position.set(x,4,z);
  copa.castShadow=true;
  cena.add(copa);
- objetos.push(copa);
 }
 
 function criarCasa(x,z){
- const casa=criarCaixa(x,2,z,8,4,7,0xd3a56d);
+ criarCaixa(x,2,z,8,4,7,0x98734b);
  const telhado=new THREE.Mesh(
   new THREE.ConeGeometry(6,3,4),
-  material(0x873c30)
+  material(0x592b24)
  );
  telhado.rotation.y=Math.PI/4;
  telhado.position.set(x,5.5,z);
  telhado.castShadow=true;
  cena.add(telhado);
- objetos.push(telhado);
-
- const porta=criarCaixa(x,1,z+3.56,1.5,2,.12,0x493023);
- return casa;
+ criarCaixa(x,1,z+3.56,1.5,2,.12,0x342018);
 }
 
 function criarPersonagem(cor){
@@ -192,7 +170,7 @@ function criarPersonagem(cor){
 
  const cabeca=new THREE.Mesh(
   new THREE.SphereGeometry(.48,12,10),
-  material(0xffc99c)
+  material(0xe8b58d)
  );
  cabeca.position.y=2.35;
  cabeca.castShadow=true;
@@ -211,7 +189,6 @@ function criarPersonagem(cor){
  );
  pernas.position.y=.38;
  grupo.add(pernas);
-
  return grupo;
 }
 
@@ -219,58 +196,59 @@ function criarInimigo(x,z){
  const grupo=criarPersonagem(0xc52e35);
  grupo.position.set(x,0,z);
  cena.add(grupo);
-
  enemies.push({
-  mesh:grupo,
-  vida:3,
-  velocidade:1.7+Math.random()*.45,
-  danoTempo:0,
-  deslocamento:Math.random()*6
+  mesh:grupo,vida:3,
+  velocidade:1.5+Math.random()*.4,
+  danoTempo:0
  });
 }
 
 function iniciarCena(){
  cena=new THREE.Scene();
- cena.background=new THREE.Color(0x83c8e9);
- cena.fog=new THREE.Fog(0x83c8e9,45,115);
+ cena.background=new THREE.Color(0x526c78);
+ cena.fog=new THREE.Fog(0x526c78,38,105);
 
  camera=new THREE.PerspectiveCamera(
   65,innerWidth/innerHeight,.1,250
  );
 
  renderer=new THREE.WebGLRenderer({
-  antialias:true,
-  powerPreference:"high-performance"
+  antialias:true,powerPreference:"high-performance"
  });
  renderer.setSize(innerWidth,innerHeight);
- renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+ renderer.setPixelRatio(Math.min(devicePixelRatio,1.3));
+
+ // Sombras e iluminação reduzidas
  renderer.shadowMap.enabled=true;
  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
  renderer.outputEncoding=THREE.sRGBEncoding;
+ renderer.toneMapping=THREE.ACESFilmicToneMapping;
+ renderer.toneMappingExposure=.72;
 
- document.body.insertBefore(renderer.domElement,document.body.firstChild);
+ document.body.insertBefore(
+  renderer.domElement,document.body.firstChild
+ );
 
- const luz=new THREE.HemisphereLight(0xffffff,0x536b39,2);
+ const luz=new THREE.HemisphereLight(0xc1d5e0,0x26351e,.65);
  cena.add(luz);
 
- const sol=new THREE.DirectionalLight(0xffffff,2);
- sol.position.set(-30,60,30);
+ const sol=new THREE.DirectionalLight(0xffe0b0,.85);
+ sol.position.set(-30,50,30);
  sol.castShadow=true;
  sol.shadow.mapSize.set(1024,1024);
  cena.add(sol);
 
  const chao=new THREE.Mesh(
   new THREE.PlaneGeometry(180,180),
-  material(0x579a48)
+  material(0x315d2c)
  );
  chao.rotation.x=-Math.PI/2;
  chao.receiveShadow=true;
  cena.add(chao);
 
- // Estradas
- const estrada= new THREE.Mesh(
+ const estrada=new THREE.Mesh(
   new THREE.PlaneGeometry(13,180),
-  material(0x77766b)
+  material(0x55534b)
  );
  estrada.rotation.x=-Math.PI/2;
  estrada.position.y=.025;
@@ -278,22 +256,20 @@ function iniciarCena(){
 
  const estrada2=new THREE.Mesh(
   new THREE.PlaneGeometry(180,12),
-  material(0x77766b)
+  material(0x55534b)
  );
  estrada2.rotation.x=-Math.PI/2;
  estrada2.position.y=.03;
  cena.add(estrada2);
 
- // Casas
  [[-22,-20],[22,-20],[-22,20],[22,20],
   [0,-35],[35,0],[-35,0],[0,35]].forEach(p=>{
-   criarCasa(p[0],p[1]);
-  });
+  criarCasa(p[0],p[1]);
+ });
 
- // Árvores
  for(let i=0;i<75;i++){
-  let x=(Math.random()-.5)*145;
-  let z=(Math.random()-.5)*145;
+  const x=(Math.random()-.5)*145;
+  const z=(Math.random()-.5)*145;
   if(Math.abs(x)<12||Math.abs(z)<12)continue;
   criarArvore(x,z);
  }
@@ -301,20 +277,21 @@ function iniciarCena(){
  jogador=criarPersonagem(0x168cff);
  cena.add(jogador);
  jogador.position.set(0,0,0);
-
  camera.position.set(0,7,10);
  relogio=new THREE.Clock();
 }
 
+function atualizarHUD(){
+ $("info").textContent=
+  "Pontos: "+pontos+" | Inimigos: "+enemies.length;
+ $("vida").style.width=vida+"%";
+ $("vida").style.background=vida<30?"#ed2828":"#28e34e";
+}
+
 function reiniciarJogo(){
- pontos=0;
- vida=100;
- ataqueTempo=0;
- invulneravel=0;
+ pontos=0;vida=100;ataqueTempo=0;invulneravel=0;
  enemies.forEach(e=>cena.remove(e.mesh));
  enemies=[];
- efeitos.forEach(e=>cena.remove(e));
- efeitos=[];
  jogador.position.set(0,0,0);
 
  for(let i=0;i<8;i++){
@@ -325,45 +302,32 @@ function reiniciarJogo(){
   }while(Math.hypot(x,z)<17);
   criarInimigo(x,z);
  }
-
  atualizarHUD();
  rodando=true;
  mensagem.style.display="none";
  relogio.start();
 }
 
-function atualizarHUD(){
- $("info").textContent=
-  "Pontos: "+pontos+" | Inimigos: "+enemies.length;
- $("vida").style.width=vida+"%";
- $("vida").style.background=
-  vida<30?"#ed2828":"#28e34e";
-}
+function atacar(){
+ if(!rodando||ataqueTempo>0)return;
+ ataqueTempo=.55;
 
-function efeitoEnergia(){
- const geometria=new THREE.SphereGeometry(.22,10,10);
- const materialEnergia=new THREE.MeshBasicMaterial({
-  color:0x45f5ff
+ // Ataque direcionado ao inimigo mais próximo
+ const alvo=enemies.slice().sort((a,b)=>
+  a.mesh.position.distanceTo(jogador.position)-
+  b.mesh.position.distanceTo(jogador.position)
+ ).find(e=>{
+  const distancia=e.mesh.position.distanceTo(jogador.position);
+  if(distancia>10)return false;
+  const frente=new THREE.Vector3(0,0,-1)
+   .applyQuaternion(jogador.quaternion);
+  const para=e.mesh.position.clone().sub(jogador.position);
+  para.y=0;
+  return para.length()>0&&frente.dot(para.normalize())>.15;
  });
- const bola=new THREE.Mesh(geometria,materialEnergia);
- bola.position.copy(jogador.position);
- bola.position.y=1.5;
- const frente=new THREE.Vector3(0,0,-1);
- frente.applyQuaternion(jogador.quaternion);
- bola.position.addScaledVector(frente,1.4);
- cena.add(bola);
 
- efeitos.push(bola);
-
- let atingiu=false;
- const alvo=enemies.slice().sort((a,b)=>{
-  return a.mesh.position.distanceTo(jogador.position)-
-         b.mesh.position.distanceTo(jogador.position);
- }).find(e=>e.mesh.position.distanceTo(jogador.position)<9);
-
- if(alvo && alvo.vida>0){
+ if(alvo){
   alvo.vida--;
-  atingiu=true;
   if(alvo.vida<=0){
    cena.remove(alvo.mesh);
    enemies=enemies.filter(e=>e!==alvo);
@@ -372,17 +336,6 @@ function efeitoEnergia(){
    if(enemies.length===0)finalizar(true);
   }
  }
-
- setTimeout(()=>{
-  cena.remove(bola);
-  efeitos=efeitos.filter(e=>e!==bola);
- },atingiu?180:300);
-}
-
-function atacar(){
- if(!rodando||ataqueTempo>0)return;
- ataqueTempo=.55;
- efeitoEnergia();
 }
 
 function finalizar(vitoria){
@@ -391,17 +344,14 @@ function finalizar(vitoria){
  mensagem.style.display="flex";
  iniciar.style.display="none";
  reiniciar.style.display="block";
-
- $("titulo").textContent="NEXUSBLATTER";
- estado.textContent=vitoria?
-  "🏆 VITÓRIA! Você venceu! Pontuação: "+pontos:
-  "Fim de jogo! Pontuação: "+pontos;
  mensagem.querySelector("h1").textContent=
   vitoria?"VOCÊ VENCEU!":"FIM DE JOGO";
  mensagem.querySelector("p").textContent=
-  vitoria?
-  "Parabéns! Todos os inimigos foram derrotados.":
+  vitoria?"Todos os inimigos foram derrotados!":
   "Sua aventura terminou. Tente novamente!";
+ estado.textContent=vitoria?
+  "🏆 VITÓRIA! Pontuação: "+pontos:
+  "Fim de jogo! Pontuação: "+pontos;
 }
 
 function movimento(dt){
@@ -417,7 +367,6 @@ function movimento(dt){
   jogador.position.z+=direcao.z*7*dt;
   jogador.rotation.y=Math.atan2(-direcao.x,-direcao.z);
  }
-
  jogador.position.x=Math.max(-78,Math.min(78,jogador.position.x));
  jogador.position.z=Math.max(-78,Math.min(78,jogador.position.z));
 }
@@ -425,40 +374,31 @@ function movimento(dt){
 function atualizarInimigos(dt){
  for(const e of enemies){
   const distancia=e.mesh.position.distanceTo(jogador.position);
-
-  if(distancia>1.5){
+  if(distancia>1.6){
    const d=new THREE.Vector3(
-    jogador.position.x-e.mesh.position.x,
-    0,
+    jogador.position.x-e.mesh.position.x,0,
     jogador.position.z-e.mesh.position.z
    ).normalize();
-
    e.mesh.position.addScaledVector(d,e.velocidade*dt);
    e.mesh.rotation.y=Math.atan2(-d.x,-d.z);
   }else if(e.danoTempo<=0&&invulneravel<=0){
-   vida-=5;
-   invulneravel=.6;
-   e.danoTempo=.9;
+   vida-=4;
+   invulneravel=.8;
+   e.danoTempo=1.1;
    atualizarHUD();
    if(vida<=0){
-    vida=0;
-    atualizarHUD();
-    finalizar(false);
-    return;
+    vida=0;atualizarHUD();finalizar(false);return;
    }
   }
-
-  e.danoTempo-=dt;
+  e.danoTempo=Math.max(0,e.danoTempo-dt);
  }
 }
 
 function atualizarCamera(dt){
  const deslocamento=new THREE.Vector3(0,5.5,8);
  deslocamento.applyQuaternion(jogador.quaternion);
-
  alvoCamera.copy(jogador.position).add(deslocamento);
  camera.position.lerp(alvoCamera,Math.min(1,dt*5));
-
  const olhar=jogador.position.clone();
  olhar.y+=1.5;
  camera.lookAt(olhar);
@@ -467,15 +407,12 @@ function atualizarCamera(dt){
 function animar(){
  requestAnimationFrame(animar);
  if(!rodando||!renderer)return;
-
  const dt=Math.min(relogio.getDelta(),.04);
  ataqueTempo=Math.max(0,ataqueTempo-dt);
  invulneravel=Math.max(0,invulneravel-dt);
-
  movimento(dt);
  atualizarInimigos(dt);
  atualizarCamera(dt);
-
  renderer.render(cena,camera);
 }
 
@@ -493,44 +430,36 @@ function ligarBotao(id,chave){
  });
 }
 
-ligarBotao("cima","cima");
-ligarBotao("baixo","baixo");
-ligarBotao("esquerda","esquerda");
-ligarBotao("direita","direita");
+["cima","baixo","esquerda","direita"].forEach(id=>{
+ ligarBotao(id,id);
+});
 
 $("atacar").addEventListener("pointerdown",e=>{
- e.preventDefault();
- atacar();
+ e.preventDefault();atacar();
 });
-
 
 iniciarCena();
-
 estado.textContent="Gráficos 3D carregados! Toque em ENTRAR NO JOGO.";
 
-iniciar.addEventListener("click",()=>{
-  reiniciarJogo();
-});
+iniciar.addEventListener("click",reiniciarJogo);
 reiniciar.addEventListener("click",()=>{
-  reiniciar.style.display="none";
-  mensagem.querySelector("h1").textContent="NEXUSBLATTER";
-  iniciar.style.display="none";
-  reiniciarJogo();
+ reiniciar.style.display="none";
+ reiniciarJogo();
 });
 
 window.addEventListener("resize",()=>{
-  if(!camera||!renderer)return;
-  camera.aspect=innerWidth/innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth,innerHeight);
+ if(!camera||!renderer)return;
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
 });
 
 animar();
-
 })();
 </script>
 </body>
 </html>
+
 
 
       
