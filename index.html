@@ -247,15 +247,17 @@ cena.add(sol);
 
  const estrada=new THREE.Mesh(
   new THREE.PlaneGeometry(13,180),
-  material(0x55534b)
- );
- estrada.rotation.x=-Math.PI/2;
- estrada.position.y=.025;
- cena.add(estrada);
+  // Grama
+material(0x579a48)
 
- const estrada2=new THREE.Mesh(
-  new THREE.PlaneGeometry(180,12),
-  material(0x55534b)
+// Árvores
+material(0x167b39)
+
+// Casas
+material(0xd3a56d)
+
+// Telhados
+material(0x873c30)
  );
  estrada2.rotation.x=-Math.PI/2;
  estrada2.position.y=.03;
