@@ -6,17 +6,21 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#101c25">
 <title>NexusBlatter</title>
+
 <style>
 *{box-sizing:border-box}
 html,body{
  margin:0;width:100%;height:100%;overflow:hidden;
  background:#101c25;color:white;
- font-family:Arial,sans-serif;touch-action:none
+ font-family:Arial,sans-serif;
+ touch-action:none
 }
 canvas{display:block;width:100%;height:100%}
+
 #hud{
  position:absolute;top:12px;left:12px;right:12px;
- pointer-events:none;text-shadow:1px 2px 3px black
+ pointer-events:none;text-shadow:1px 2px 3px black;
+ z-index:2
 }
 #titulo{font-size:20px;font-weight:bold;color:#56f5ff}
 #info{margin-top:8px;font-size:14px}
@@ -27,20 +31,25 @@ canvas{display:block;width:100%;height:100%}
 #vida{width:100%;height:100%;background:#28e34e;border-radius:10px}
 #ajuda{
  position:absolute;top:100px;left:12px;
- font-size:12px;text-shadow:1px 2px 3px black
+ font-size:12px;text-shadow:1px 2px 3px black;
+ z-index:2
 }
 #controles{
  position:absolute;bottom:18px;left:12px;right:12px;
- display:flex;justify-content:space-between;align-items:end
+ display:flex;justify-content:space-between;align-items:end;
+ z-index:3
 }
 #direcoes{
- display:grid;grid-template-columns:52px 52px 52px;
+ display:grid;
+ grid-template-columns:52px 52px 52px;
  grid-template-rows:52px 52px 52px;gap:5px
 }
 .controle{
  background:#142c38ee;border:2px solid #59eaff;
  color:white;border-radius:13px;font-size:23px;
- font-weight:bold;width:52px;height:52px;touch-action:none
+ font-weight:bold;width:52px;height:52px;
+ touch-action:none;user-select:none;
+ -webkit-user-select:none
 }
 .controle:active{background:#168ba5}
 #cima{grid-column:2}
@@ -53,19 +62,22 @@ canvas{display:block;width:100%;height:100%}
  color:white;font-size:16px;font-weight:bold
 }
 #mensagem{
- position:absolute;inset:0;background:#06121bea;
+ position:absolute;inset:0;background:#06121bed;
  display:flex;flex-direction:column;justify-content:center;
  align-items:center;text-align:center;padding:25px;z-index:5
 }
 #mensagem h1{color:#56f5ff;font-size:35px}
-#reiniciar{
- display:none;padding:16px 28px;background:#12a9b8;
+#mensagem p{max-width:300px}
+#reiniciar,#iniciar{
+ padding:16px 28px;background:#12a9b8;
  color:white;border:2px solid white;border-radius:12px;
  font-size:18px;font-weight:bold
 }
+#reiniciar{display:none}
 #estado{font-size:14px;color:#ffdc75}
 </style>
 </head>
+
 <body>
 
 <div id="hud">
@@ -73,6 +85,7 @@ canvas{display:block;width:100%;height:100%}
  <div id="info">Pontos: 0 | Inimigos: 8</div>
  <div id="vidaFundo"><div id="vida"></div></div>
 </div>
+
 <div id="ajuda">Explore o mapa e derrote os inimigos!</div>
 
 <div id="controles">
@@ -88,43 +101,55 @@ canvas{display:block;width:100%;height:100%}
 <div id="mensagem">
  <h1>NEXUSBLATTER</h1>
  <p>Explore um mundo 3D e enfrente seus desafios!</p>
- <button id="iniciar" class="controle" style="width:auto;padding:12px 25px;font-size:17px">ENTRAR NO JOGO</button>
- <p id="estado">Carregando gráficos 3D...</p>
+ <button id="iniciar">ENTRAR NO JOGO</button>
+ <p id="estado">Preparando gráficos 3D...</p>
  <button id="reiniciar">JOGAR NOVAMENTE</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
 <script>
 (()=>{
 "use strict";
+
 const $=id=>document.getElementById(id);
+
 const mensagem=$("mensagem");
 const estado=$("estado");
 const iniciar=$("iniciar");
 const reiniciar=$("reiniciar");
 
 if(!window.THREE){
- estado.textContent="Erro ao carregar 3D. Verifique a internet.";
+ estado.textContent="Erro ao carregar 3D. Verifique sua internet e atualize a página.";
  iniciar.style.display="none";
  return;
 }
 
 let cena,camera,renderer,relogio;
-let jogador,enemies=[],teclas={};
-let pontos=0,vida=100,rodando=false;
-let ataqueTempo=0,invulneravel=0;
-let direcao=new THREE.Vector3();
-let alvoCamera=new THREE.Vector3();
+let jogador;
+let enemies=[];
+let teclas={};
+let pontos=0;
+let vida=100;
+let rodando=false;
+let ataqueTempo=0;
+let invulneravel=0;
+
+const direcao=new THREE.Vector3();
+const alvoCamera=new THREE.Vector3();
 
 function material(cor,roughness=.95){
  return new THREE.MeshStandardMaterial({
-  color:cor,roughness,metalness:0
+  color:cor,
+  roughness:roughness,
+  metalness:0
  });
 }
 
-function criarCaixa(x,y,z,l,a,p,cor){
+function caixa(x,y,z,l,a,p,cor){
  const mesh=new THREE.Mesh(
-  new THREE.BoxGeometry(l,a,p),material(cor)
+  new THREE.BoxGeometry(l,a,p),
+  material(cor)
  );
  mesh.position.set(x,y,z);
  mesh.castShadow=true;
@@ -133,37 +158,140 @@ function criarCaixa(x,y,z,l,a,p,cor){
  return mesh;
 }
 
-function criarArvore(x,z){
- criarCaixa(x,1,z,.5,2,.5,0x54331e);
- const copa=new THREE.Mesh(
-  new THREE.ConeGeometry(2,5,7),
-  material(0x145326)
+// CHÃO DO MAPA
+function criarMapa(){
+
+ const terreno=new THREE.Mesh(
+  new THREE.PlaneGeometry(190,190),
+  material(0x477d36)
  );
- copa.position.set(x,4,z);
- copa.castShadow=true;
- cena.add(copa);
+
+ terreno.rotation.x=-Math.PI/2;
+ terreno.position.y=-.06;
+ terreno.receiveShadow=true;
+ cena.add(terreno);
+
+ // Estrada principal
+ const estrada=new THREE.Mesh(
+  new THREE.PlaneGeometry(12,190),
+  material(0x414a50)
+ );
+
+ estrada.rotation.x=-Math.PI/2;
+ estrada.position.y=.02;
+ cena.add(estrada);
+
+ // Estrada transversal
+ const estrada2=new THREE.Mesh(
+  new THREE.PlaneGeometry(190,12),
+  material(0x414a50)
+ );
+
+ estrada2.rotation.x=-Math.PI/2;
+ estrada2.position.y=.025;
+ cena.add(estrada2);
+
+ // Faixas amarelas
+ for(let z=-85;z<90;z+=12){
+  const faixa=new THREE.Mesh(
+   new THREE.BoxGeometry(.25,.035,5),
+   material(0xe9c84b)
+  );
+  faixa.position.set(0,.06,z);
+  cena.add(faixa);
+ }
+
+ for(let x=-85;x<90;x+=12){
+  const faixa=new THREE.Mesh(
+   new THREE.BoxGeometry(5,.035,.25),
+   material(0xe9c84b)
+  );
+  faixa.position.set(x,.065,0);
+  cena.add(faixa);
+ }
+
+ // Pequenas áreas de terra
+ for(let i=0;i<35;i++){
+  const x=(Math.random()-.5)*170;
+  const z=(Math.random()-.5)*170;
+
+  if(Math.abs(x)<10||Math.abs(z)<10)continue;
+
+  const mancha=new THREE.Mesh(
+   new THREE.CircleGeometry(2+Math.random()*3,8),
+   material(0x568d3c)
+  );
+
+  mancha.rotation.x=-Math.PI/2;
+  mancha.position.set(x,.005,z);
+  cena.add(mancha);
+ }
 }
 
+// ÁRVORES
+function criarArvore(x,z){
+
+ const tronco=new THREE.Mesh(
+  new THREE.CylinderGeometry(.3,.48,2.5,8),
+  material(0x654024)
+ );
+
+ tronco.position.set(x,1.25,z);
+ tronco.castShadow=true;
+ cena.add(tronco);
+
+ const copa=new THREE.Mesh(
+  new THREE.ConeGeometry(2.2,5,7),
+  material(0x17602c)
+ );
+
+ copa.position.set(x,4.2,z);
+ copa.castShadow=true;
+ cena.add(copa);
+
+ const copa2=new THREE.Mesh(
+  new THREE.ConeGeometry(1.6,3.5,7),
+  material(0x23833a)
+ );
+
+ copa2.position.set(x,5.2,z);
+ copa2.castShadow=true;
+ cena.add(copa2);
+}
+
+// CASAS
 function criarCasa(x,z){
- criarCaixa(x,2,z,8,4,7,0x98734b);
+
+ caixa(x,2,z,8,4,7,0xb58a57);
+
  const telhado=new THREE.Mesh(
   new THREE.ConeGeometry(6,3,4),
-  material(0x592b24)
+  material(0x793b2c)
  );
+
  telhado.rotation.y=Math.PI/4;
  telhado.position.set(x,5.5,z);
  telhado.castShadow=true;
  cena.add(telhado);
- criarCaixa(x,1,z+3.56,1.5,2,.12,0x342018);
+
+ // Porta
+ caixa(x,1,z+3.56,1.5,2,.12,0x392219);
+
+ // Janelas
+ caixa(x-2.4,2.5,z+3.58,1.3,1,.15,0x68c9dc);
+ caixa(x+2.4,2.5,z+3.58,1.3,1,.15,0x68c9dc);
 }
 
+// PERSONAGEM
 function criarPersonagem(cor){
+
  const grupo=new THREE.Group();
 
  const corpo=new THREE.Mesh(
   new THREE.CylinderGeometry(.55,.7,1.4,10),
   material(cor)
  );
+
  corpo.position.y=1.3;
  corpo.castShadow=true;
  grupo.add(corpo);
@@ -172,6 +300,7 @@ function criarPersonagem(cor){
   new THREE.SphereGeometry(.48,12,10),
   material(0xe8b58d)
  );
+
  cabeca.position.y=2.35;
  cabeca.castShadow=true;
  grupo.add(cabeca);
@@ -180,6 +309,7 @@ function criarPersonagem(cor){
   new THREE.BoxGeometry(.7,.9,.35),
   material(0x263e59)
  );
+
  mochila.position.set(0,1.5,-.55);
  grupo.add(mochila);
 
@@ -187,245 +317,377 @@ function criarPersonagem(cor){
   new THREE.BoxGeometry(.9,.65,.55),
   material(0x202d40)
  );
+
  pernas.position.y=.38;
  grupo.add(pernas);
+
+ // Detalhe azul no peito
+ const detalhe=new THREE.Mesh(
+  new THREE.BoxGeometry(.65,.2,.08),
+  material(0x56f5ff)
+ );
+
+ detalhe.position.set(0,1.55,.59);
+ grupo.add(detalhe);
+
  return grupo;
 }
 
+// INIMIGOS
 function criarInimigo(x,z){
+
  const grupo=criarPersonagem(0xc52e35);
+
  grupo.position.set(x,0,z);
  cena.add(grupo);
+
  enemies.push({
-  mesh:grupo,vida:3,
-  velocidade:1.5+Math.random()*.4,
+  mesh:grupo,
+  vida:3,
+  velocidade:1.5+Math.random()*.5,
   danoTempo:0
  });
 }
 
+// INICIALIZAÇÃO
 function iniciarCena(){
+
  cena=new THREE.Scene();
+
  cena.background=new THREE.Color(0x526c78);
- cena.fog=new THREE.Fog(0x526c78,38,105);
+ cena.fog=new THREE.Fog(0x526c78,65,155);
 
  camera=new THREE.PerspectiveCamera(
-  65,innerWidth/innerHeight,.1,250
+  65,innerWidth/innerHeight,.1,300
  );
 
  renderer=new THREE.WebGLRenderer({
-  antialias:true,powerPreference:"high-performance"
+  antialias:true,
+  powerPreference:"high-performance"
  });
+
  renderer.setSize(innerWidth,innerHeight);
  renderer.setPixelRatio(Math.min(devicePixelRatio,1.3));
 
- // Sombras e iluminação reduzidas
  renderer.shadowMap.enabled=true;
  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+
  renderer.outputEncoding=THREE.sRGBEncoding;
  renderer.toneMapping=THREE.ACESFilmicToneMapping;
- renderer.toneMappingExposure=.55;
+ renderer.toneMappingExposure=.8;
 
  document.body.insertBefore(
-  renderer.domElement,document.body.firstChild
+  renderer.domElement,
+  document.body.firstChild
  );
 
- const luz=new THREE.HemisphereLight(0xc1d5e0,0x26351e,.65);
- cena.add(luz);
+ // ILUMINAÇÃO CORRIGIDA
+ const luzAmbiente=new THREE.HemisphereLight(
+  0xc1d5e0,
+  0x26351e,
+  .75
+ );
 
- const sol=new THREE.DirectionalLight(0xffe0b0,.85);
+ cena.add(luzAmbiente);
+
+ const sol=new THREE.DirectionalLight(
+  0xffe0b0,
+  1.0
+ );
+
  sol.position.set(-30,50,30);
  sol.castShadow=true;
  sol.shadow.mapSize.set(1024,1024);
- cena.add(sol);const luz=new THREE.HemisphereLight(0xffffff,0x38552d,0.9);
-cena.add(luz);
+ cena.add(sol);
 
-const sol=new THREE.DirectionalLight(0xffffff,1.15);
-sol.position.set(-30,60,30);
-sol.castShadow=true;
-sol.shadow.mapSize.set(1024,1024);
-cena.add(sol);
+ // MAPA
+ criarMapa();
 
- const estrada=new THREE.Mesh(
-  new THREE.PlaneGeometry(13,180),
-  // Grama
-material(0x579a48)
-
-// Árvores
-material(0x167b39)
-
-// Casas
-material(0xd3a56d)
-
-// Telhados
-material(0x873c30)
- );
- estrada2.rotation.x=-Math.PI/2;
- estrada2.position.y=.03;
- cena.add(estrada2);
-
- [[-22,-20],[22,-20],[-22,20],[22,20],
-  [0,-35],[35,0],[-35,0],[0,35]].forEach(p=>{
+ // CASAS
+ [
+  [-22,-20],[22,-20],
+  [-22,20],[22,20],
+  [35,-35],[-35,35],
+  [35,35],[-35,-35]
+ ].forEach(p=>{
   criarCasa(p[0],p[1]);
  });
 
- for(let i=0;i<75;i++){
-  const x=(Math.random()-.5)*145;
-  const z=(Math.random()-.5)*145;
-  if(Math.abs(x)<12||Math.abs(z)<12)continue;
+ // ÁRVORES
+ for(let i=0;i<100;i++){
+
+  const x=(Math.random()-.5)*175;
+  const z=(Math.random()-.5)*175;
+
+  if(Math.abs(x)<13||Math.abs(z)<13)continue;
+
   criarArvore(x,z);
  }
 
+ // JOGADOR
  jogador=criarPersonagem(0x168cff);
  cena.add(jogador);
  jogador.position.set(0,0,0);
+
  camera.position.set(0,7,10);
+
  relogio=new THREE.Clock();
 }
 
+// HUD
 function atualizarHUD(){
+
  $("info").textContent=
   "Pontos: "+pontos+" | Inimigos: "+enemies.length;
+
  $("vida").style.width=vida+"%";
- $("vida").style.background=vida<30?"#ed2828":"#28e34e";
+
+ $("vida").style.background=
+  vida<30?"#ed2828":"#28e34e";
 }
 
+// NOVA PARTIDA
 function reiniciarJogo(){
- pontos=0;vida=100;ataqueTempo=0;invulneravel=0;
+
+ pontos=0;
+ vida=100;
+ ataqueTempo=0;
+ invulneravel=0;
+
  enemies.forEach(e=>cena.remove(e.mesh));
  enemies=[];
+
  jogador.position.set(0,0,0);
+ jogador.rotation.set(0,0,0);
 
  for(let i=0;i<8;i++){
+
   let x,z;
+
   do{
    x=(Math.random()-.5)*85;
    z=(Math.random()-.5)*85;
   }while(Math.hypot(x,z)<17);
+
   criarInimigo(x,z);
  }
+
  atualizarHUD();
+
+ teclas={};
  rodando=true;
+
  mensagem.style.display="none";
+
  relogio.start();
 }
 
+// ATAQUE
 function atacar(){
+
  if(!rodando||ataqueTempo>0)return;
+
  ataqueTempo=.55;
 
- // Ataque direcionado ao inimigo mais próximo
- const alvo=enemies.slice().sort((a,b)=>
-  a.mesh.position.distanceTo(jogador.position)-
-  b.mesh.position.distanceTo(jogador.position)
- ).find(e=>{
-  const distancia=e.mesh.position.distanceTo(jogador.position);
-  if(distancia>10)return false;
-  const frente=new THREE.Vector3(0,0,-1)
-   .applyQuaternion(jogador.quaternion);
-  const para=e.mesh.position.clone().sub(jogador.position);
-  para.y=0;
-  return para.length()>0&&frente.dot(para.normalize())>.15;
- });
+ const frente=new THREE.Vector3(0,0,-1)
+  .applyQuaternion(jogador.quaternion);
 
- if(alvo){
-  alvo.vida--;
-  if(alvo.vida<=0){
-   cena.remove(alvo.mesh);
-   enemies=enemies.filter(e=>e!==alvo);
+ let melhor=null;
+ let menorDistancia=10;
+
+ for(const e of enemies){
+
+  const para=e.mesh.position.clone()
+   .sub(jogador.position);
+
+  para.y=0;
+
+  const distancia=para.length();
+
+  if(distancia>menorDistancia||distancia===0)continue;
+
+  if(frente.dot(para.normalize())>.15){
+   melhor=e;
+   menorDistancia=distancia;
+  }
+ }
+
+ if(melhor){
+
+  melhor.vida--;
+
+  if(melhor.vida<=0){
+
+   cena.remove(melhor.mesh);
+
+   enemies=enemies.filter(e=>e!==melhor);
+
    pontos+=100;
+
    atualizarHUD();
-   if(enemies.length===0)finalizar(true);
+
+   if(enemies.length===0){
+    finalizar(true);
+   }
   }
  }
 }
 
+// VITÓRIA OU DERROTA
 function finalizar(vitoria){
+
  if(!rodando)return;
+
  rodando=false;
+
+ teclas={};
+
  mensagem.style.display="flex";
  iniciar.style.display="none";
  reiniciar.style.display="block";
+
  mensagem.querySelector("h1").textContent=
   vitoria?"VOCÊ VENCEU!":"FIM DE JOGO";
+
  mensagem.querySelector("p").textContent=
-  vitoria?"Todos os inimigos foram derrotados!":
+  vitoria?
+  "Todos os inimigos foram derrotados!":
   "Sua aventura terminou. Tente novamente!";
+
  estado.textContent=vitoria?
   "🏆 VITÓRIA! Pontuação: "+pontos:
   "Fim de jogo! Pontuação: "+pontos;
 }
 
+// MOVIMENTO
 function movimento(dt){
+
  let x=0,z=0;
+
  if(teclas.cima)z-=1;
  if(teclas.baixo)z+=1;
  if(teclas.esquerda)x-=1;
  if(teclas.direita)x+=1;
 
  if(x||z){
+
   direcao.set(x,0,z).normalize();
+
   jogador.position.x+=direcao.x*7*dt;
   jogador.position.z+=direcao.z*7*dt;
-  jogador.rotation.y=Math.atan2(-direcao.x,-direcao.z);
+
+  jogador.rotation.y=Math.atan2(
+   -direcao.x,-direcao.z
+  );
  }
- jogador.position.x=Math.max(-78,Math.min(78,jogador.position.x));
- jogador.position.z=Math.max(-78,Math.min(78,jogador.position.z));
+
+ jogador.position.x=Math.max(
+  -88,Math.min(88,jogador.position.x)
+ );
+
+ jogador.position.z=Math.max(
+  -88,Math.min(88,jogador.position.z)
+ );
 }
 
+// INTELIGÊNCIA DOS INIMIGOS
 function atualizarInimigos(dt){
+
  for(const e of enemies){
-  const distancia=e.mesh.position.distanceTo(jogador.position);
-  if(distancia>1.6){
+
+  const distancia=e.mesh.position.distanceTo(
+   jogador.position
+  );
+
+  if(distancia>1.7){
+
    const d=new THREE.Vector3(
-    jogador.position.x-e.mesh.position.x,0,
+    jogador.position.x-e.mesh.position.x,
+    0,
     jogador.position.z-e.mesh.position.z
    ).normalize();
-   e.mesh.position.addScaledVector(d,e.velocidade*dt);
+
+   e.mesh.position.addScaledVector(
+    d,e.velocidade*dt
+   );
+
    e.mesh.rotation.y=Math.atan2(-d.x,-d.z);
+
   }else if(e.danoTempo<=0&&invulneravel<=0){
+
    vida-=4;
+
    invulneravel=.8;
    e.danoTempo=1.1;
+
    atualizarHUD();
+
    if(vida<=0){
-    vida=0;atualizarHUD();finalizar(false);return;
+
+    vida=0;
+    atualizarHUD();
+    finalizar(false);
+    return;
    }
   }
+
   e.danoTempo=Math.max(0,e.danoTempo-dt);
  }
 }
 
+// CÂMERA EM TERCEIRA PESSOA
 function atualizarCamera(dt){
+
  const deslocamento=new THREE.Vector3(0,5.5,8);
+
  deslocamento.applyQuaternion(jogador.quaternion);
+
  alvoCamera.copy(jogador.position).add(deslocamento);
- camera.position.lerp(alvoCamera,Math.min(1,dt*5));
+
+ camera.position.lerp(
+  alvoCamera,
+  Math.min(1,dt*5)
+ );
+
  const olhar=jogador.position.clone();
  olhar.y+=1.5;
+
  camera.lookAt(olhar);
 }
 
+// LOOP DO JOGO
 function animar(){
+
  requestAnimationFrame(animar);
+
  if(!rodando||!renderer)return;
+
  const dt=Math.min(relogio.getDelta(),.04);
+
  ataqueTempo=Math.max(0,ataqueTempo-dt);
  invulneravel=Math.max(0,invulneravel-dt);
+
  movimento(dt);
  atualizarInimigos(dt);
  atualizarCamera(dt);
+
  renderer.render(cena,camera);
 }
 
+// CONTROLES DO CELULAR
 function ligarBotao(id,chave){
+
  const botao=$(id);
+
  botao.addEventListener("pointerdown",e=>{
   e.preventDefault();
   teclas[chave]=true;
+
+  try{botao.setPointerCapture(e.pointerId)}catch(_){}
  });
- ["pointerup","pointercancel","pointerleave"].forEach(ev=>{
-  botao.addEventListener(ev,e=>{
-   e.preventDefault();
+
+ ["pointerup","pointercancel","lostpointercapture"].forEach(ev=>{
+  botao.addEventListener(ev,()=>{
    teclas[chave]=false;
   });
  });
@@ -436,30 +698,55 @@ function ligarBotao(id,chave){
 });
 
 $("atacar").addEventListener("pointerdown",e=>{
- e.preventDefault();atacar();
+ e.preventDefault();
+ atacar();
 });
 
-iniciarCena();
-estado.textContent="Gráficos 3D carregados! Toque em ENTRAR NO JOGO.";
-
+// BOTÕES DE ENTRADA
 iniciar.addEventListener("click",reiniciarJogo);
+
 reiniciar.addEventListener("click",()=>{
  reiniciar.style.display="none";
+ iniciar.style.display="none";
  reiniciarJogo();
 });
 
+// AJUSTE DA TELA
 window.addEventListener("resize",()=>{
+
  if(!camera||!renderer)return;
+
  camera.aspect=innerWidth/innerHeight;
  camera.updateProjectionMatrix();
+
  renderer.setSize(innerWidth,innerHeight);
 });
 
-animar();
+// INICIAR
+try{
+
+ iniciarCena();
+
+ estado.textContent=
+  "Gráficos 3D carregados! Toque em ENTRAR NO JOGO.";
+
+ animar();
+
+}catch(erro){
+
+ console.error(erro);
+
+ estado.textContent=
+  "Erro ao iniciar o mapa 3D. Tente atualizar a página.";
+
+ iniciar.style.display="none";
+}
+
 })();
 </script>
 </body>
 </html>
+
 
 
 
