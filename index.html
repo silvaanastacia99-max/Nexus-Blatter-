@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#101c25">
-<title>NexusBlatter 3D</title>
+<title>NexusBlatter 3D - Anime Battle Royale</title>
 
 <style>
 *{box-sizing:border-box}
@@ -19,19 +19,20 @@ canvas{display:block;width:100%;height:100%}
 #hud{
  position:fixed;top:10px;left:10px;right:10px;
  z-index:5;pointer-events:none;
- display:flex;justify-content:space-between;
- align-items:flex-start;gap:8px;
+ display:flex;justify-content:space-between;gap:8px;
 }
 .painel{
- background:#101923cc;border:1px solid #ffffff33;
- border-radius:12px;padding:9px 12px;
- font-size:13px;
+ background:#101923dd;border:1px solid #ffffff44;
+ border-radius:12px;padding:9px 12px;font-size:13px;
 }
 #barraFundo{
  width:120px;height:12px;background:#555;
  border-radius:20px;overflow:hidden;margin-top:5px;
 }
-#barraVida{height:100%;width:100%;background:#24e85a}
+#barraVida{
+ height:100%;width:100%;background:#24e85a;
+ transition:width .15s;
+}
 #controles{
  position:fixed;bottom:18px;left:0;right:0;
  z-index:8;display:flex;justify-content:space-between;
@@ -48,27 +49,28 @@ canvas{display:block;width:100%;height:100%}
  width:53px;height:53px;border-radius:50%;
  background:#ffffffaa;border:2px solid white;
  position:absolute;left:34px;top:34px;
+ pointer-events:none;
 }
 #botoes{
- display:flex;gap:12px;align-items:flex-end;
+ display:flex;gap:10px;align-items:flex-end;
  pointer-events:auto;
 }
 .btn{
  width:65px;height:65px;border-radius:50%;
  border:2px solid #ffffffaa;
  background:#172a3ddd;color:white;
- font-size:24px;font-weight:bold;
+ font-size:23px;font-weight:bold;
  touch-action:none;
 }
 #atacar{
  width:78px;height:78px;
  background:#e34c37dd;border-color:#ffb19b;
- font-size:15px;
+ font-size:14px;
 }
 #cameraDica{
  position:fixed;right:12px;bottom:110px;
- z-index:5;color:white;font-size:10px;
- opacity:.65;pointer-events:none;
+ z-index:5;font-size:10px;opacity:.7;
+ pointer-events:none;
 }
 #mensagem{
  position:fixed;inset:0;z-index:20;
@@ -76,13 +78,13 @@ canvas{display:block;width:100%;height:100%}
  background:#07111bdc;text-align:center;padding:20px;
 }
 #caixa{
- width:min(340px,95%);
- padding:25px;border-radius:20px;
+ width:min(340px,95%);padding:25px;
+ border-radius:20px;
  background:linear-gradient(145deg,#193b52,#101c2c);
  border:1px solid #5edaff88;
  box-shadow:0 0 35px #00bfff33;
 }
-#caixa h1{color:#55e5ff;font-size:29px;margin:0 0 10px}
+#caixa h1{color:#55e5ff;font-size:29px}
 #caixa p{line-height:1.5;color:#e0e9f0}
 #jogar{
  padding:15px 25px;border:0;border-radius:12px;
@@ -92,7 +94,7 @@ canvas{display:block;width:100%;height:100%}
 #aviso{
  position:fixed;top:50%;left:50%;
  transform:translate(-50%,-50%);
- z-index:15;color:white;background:#111cdd;
+ z-index:15;color:white;background:#172cdd;
  padding:15px;border-radius:12px;display:none;
 }
 </style>
@@ -113,7 +115,7 @@ canvas{display:block;width:100%;height:100%}
  </div>
 </div>
 
-<div id="cameraDica">Arraste o lado direito para girar a câmera</div>
+<div id="cameraDica">Arraste a tela do lado direito para girar</div>
 
 <div id="controles">
  <div id="joystick"><div id="bola"></div></div>
@@ -127,7 +129,7 @@ canvas{display:block;width:100%;height:100%}
  <div id="caixa">
   <h1>NEXUSBLATTER</h1>
   <p>ANIME BATTLE ROYALE 3D</p>
-  <p>Explore o mapa, enfrente os desafios e vença a batalha!</p>
+  <p>Explore o mapa e enfrente os adversários!</p>
   <button id="jogar">ENTRAR NO JOGO</button>
  </div>
 </div>
@@ -135,43 +137,45 @@ canvas{display:block;width:100%;height:100%}
 <div id="aviso"></div>
 
 <script type="module">
+
 import * as THREE from
 'https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js';
 
-const cena = new THREE.Scene();
-cena.background = new THREE.Color(0x91c9e8);
-cena.fog = new THREE.Fog(0x91c9e8,65,155);
+// CENA
 
-const camera = new THREE.PerspectiveCamera(
- 65,window.innerWidth/window.innerHeight,0.1,250
+const cena=new THREE.Scene();
+cena.background=new THREE.Color(0x91c9e8);
+cena.fog=new THREE.Fog(0x91c9e8,75,170);
+
+const camera=new THREE.PerspectiveCamera(
+ 65,innerWidth/innerHeight,.1,300
 );
 
-let renderer;
+const renderer=new THREE.WebGLRenderer({
+ antialias:true,
+ powerPreference:"high-performance"
+});
 
-try{
- renderer=new THREE.WebGLRenderer({
-  antialias:true,
-  powerPreference:"high-performance"
- });
- renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
- renderer.setSize(innerWidth,innerHeight);
- renderer.shadowMap.enabled=true;
- renderer.shadowMap.type=THREE.PCFSoftShadowMap;
- renderer.outputColorSpace=THREE.SRGBColorSpace;
- document.body.appendChild(renderer.domElement);
-}catch(e){
- document.getElementById("caixa").innerHTML=
- "<h1>Erro gráfico</h1><p>Seu navegador não conseguiu iniciar o 3D. Atualize o navegador e tente novamente.</p>";
- throw e;
-}
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
 
-cena.add(new THREE.HemisphereLight(0xc8eaff,0x52603a,2));
+// LUZES
+
+cena.add(new THREE.HemisphereLight(
+ 0xc8eaff,0x52603a,2
+));
 
 const sol=new THREE.DirectionalLight(0xfff1d1,2);
 sol.position.set(-30,60,30);
 sol.castShadow=true;
 sol.shadow.mapSize.set(1024,1024);
 cena.add(sol);
+
+// MATERIAIS
 
 function material(cor,extra={}){
  return new THREE.MeshStandardMaterial({
@@ -180,17 +184,12 @@ function material(cor,extra={}){
 }
 
 const verde=material(0x438c48);
-const grama=material(0x579d45);
 const estrada=material(0x62666c);
 const madeira=material(0x71452c);
 const folha=material(0x287b3d);
-const branco=material(0xffffff);
-const preto=material(0x202333);
 const pele=material(0xe5a77d);
-const azul=material(0x177be8);
-const vermelho=material(0xd94150);
-const dourado=material(0xffcb35);
-const roxo=material(0x8749d8);
+
+// CHÃO
 
 const chao=new THREE.Mesh(
  new THREE.PlaneGeometry(190,190),verde
@@ -199,28 +198,31 @@ chao.rotation.x=-Math.PI/2;
 chao.receiveShadow=true;
 cena.add(chao);
 
-// Estrada principal
+// ESTRADAS
+
 function criarEstrada(x,z,w,d){
  const m=new THREE.Mesh(
   new THREE.BoxGeometry(w,.08,d),estrada
  );
  m.position.set(x,.05,z);
- m.receiveShadow=true;
  cena.add(m);
 }
-criarEstrada(0,.1,190,9);
+
+criarEstrada(0,0,190,9);
 criarEstrada(0,0,9,190);
 
-// Casas
+// CASAS
+
 function casa(x,z,cor){
- const grupo=new THREE.Group();
+ const g=new THREE.Group();
+
  const parede=new THREE.Mesh(
   new THREE.BoxGeometry(7,4.5,6),
   material(cor)
  );
  parede.position.y=2.25;
  parede.castShadow=true;
- grupo.add(parede);
+ g.add(parede);
 
  const telhado=new THREE.Mesh(
   new THREE.ConeGeometry(5.2,2.8,4),
@@ -228,25 +230,25 @@ function casa(x,z,cor){
  );
  telhado.position.y=5.8;
  telhado.rotation.y=Math.PI/4;
- telhado.castShadow=true;
- grupo.add(telhado);
+ g.add(telhado);
 
  const porta=new THREE.Mesh(
   new THREE.BoxGeometry(1.2,2.5,.12),madeira
  );
  porta.position.set(0,1.25,3.06);
- grupo.add(porta);
+ g.add(porta);
 
  const janela=new THREE.Mesh(
   new THREE.BoxGeometry(1.4,1.1,.13),
-  material(0x78dafa,{metalness:.2})
+  material(0x78dafa)
  );
  janela.position.set(2,2.7,3.08);
- grupo.add(janela);
+ g.add(janela);
 
- grupo.position.set(x,0,z);
- cena.add(grupo);
+ g.position.set(x,0,z);
+ cena.add(g);
 }
+
 casa(-22,-22,0xd6b47d);
 casa(25,-29,0xc48bd8);
 casa(-34,28,0xd4d8e2);
@@ -254,21 +256,21 @@ casa(35,30,0xd1a46e);
 casa(5,47,0x9eb7d5);
 casa(-52,-4,0xd6c18c);
 
-// Árvores
+// ÁRVORES
+
 function arvore(x,z){
  const g=new THREE.Group();
+
  const tronco=new THREE.Mesh(
   new THREE.CylinderGeometry(.35,.55,3,7),madeira
  );
  tronco.position.y=1.5;
- tronco.castShadow=true;
  g.add(tronco);
 
  const copa=new THREE.Mesh(
   new THREE.SphereGeometry(2.3,8,7),folha
  );
  copa.position.y=4;
- copa.castShadow=true;
  g.add(copa);
 
  const copa2=new THREE.Mesh(
@@ -281,29 +283,39 @@ function arvore(x,z){
  g.position.set(x,0,z);
  cena.add(g);
 }
+
 for(let i=0;i<100;i++){
- let x=(Math.random()-.5)*170;
- let z=(Math.random()-.5)*170;
- if(Math.abs(x)<10 || Math.abs(z)<10)continue;
+ const x=(Math.random()-.5)*170;
+ const z=(Math.random()-.5)*170;
+
+ if(Math.abs(x)<10||Math.abs(z)<10)continue;
+
  arvore(x,z);
 }
 
-// Rochas
+// ROCHAS
+
 for(let i=0;i<35;i++){
  const rocha=new THREE.Mesh(
-  new THREE.DodecahedronGeometry(1+Math.random()*1.5),
+  new THREE.DodecahedronGeometry(
+   1+Math.random()*1.5
+  ),
   material(0x777e78)
  );
+
  rocha.position.set(
   (Math.random()-.5)*160,.5,
   (Math.random()-.5)*160
  );
+
  rocha.castShadow=true;
  cena.add(rocha);
 }
 
-// Personagem original
+// PERSONAGEM
+
 function criarPersonagem(corCabelo,corRoupa){
+
  const g=new THREE.Group();
 
  const corpo=new THREE.Mesh(
@@ -318,119 +330,109 @@ function criarPersonagem(corCabelo,corRoupa){
   new THREE.SphereGeometry(.43,12,10),pele
  );
  cabeca.position.y=2.45;
- cabeca.castShadow=true;
  g.add(cabeca);
 
  const cabelo=new THREE.Mesh(
   new THREE.SphereGeometry(.46,10,8),
   material(corCabelo)
  );
- cabelo.scale.set(1, .65,1);
+ cabelo.scale.set(1,.65,1);
  cabelo.position.y=2.75;
  g.add(cabelo);
 
- const olhoMat=material(0x151525);
- for(let s of [-1,1]){
+ const olhos=material(0x151525);
+
+ for(const s of [-1,1]){
   const olho=new THREE.Mesh(
-   new THREE.SphereGeometry(.055,8,8),olhoMat
+   new THREE.SphereGeometry(.055,8,8),olhos
   );
   olho.position.set(s*.15,2.48,-.36);
   g.add(olho);
  }
 
- const pernaMat=material(0x26334c);
- for(let s of [-1,1]){
+ const pernas=material(0x26334c);
+
+ for(const s of [-1,1]){
   const perna=new THREE.Mesh(
-   new THREE.BoxGeometry(.27,.75,.3),pernaMat
+   new THREE.BoxGeometry(.27,.75,.3),pernas
   );
   perna.position.set(s*.23,.55,0);
   g.add(perna);
  }
+
+ g.traverse(o=>{
+  if(o.isMesh)o.castShadow=true;
+ });
+
  return g;
 }
+
+// JOGADOR
 
 const jogador=criarPersonagem(0x172c70,0x1c68c9);
 jogador.position.set(0,0,0);
 cena.add(jogador);
 
+// INIMIGOS
+
 const inimigos=[];
-const coresInimigos=[
+const cores=[
  0xbd344b,0x7135a8,0x282c43,
  0x9c5a27,0x287a72,0x8d3470
 ];
 
-for(let i=0;i<6;i++){
- const inimigo=criarPersonagem(0x252039,coresInimigos[i]);
- let ang=i*Math.PI/3;
- inimigo.position.set(
-  Math.sin(ang)*35,0,Math.cos(ang)*35
- );
- cena.add(inimigo);
- inimigos.push({
-  obj:inimigo,
-  vida:3,
-  velocidade:1.7+Math.random()*.35,
-  proximoAtaque:0,
-  vivo:true
- });
+function criarInimigos(){
+
+ inimigos.length=0;
+
+ for(let i=0;i<6;i++){
+
+  const obj=criarPersonagem(0x252039,cores[i]);
+
+  const ang=i*Math.PI/3;
+
+  obj.position.set(
+   Math.sin(ang)*30,0,
+   Math.cos(ang)*30
+  );
+
+  cena.add(obj);
+
+  inimigos.push({
+   obj,
+   vida:3,
+   velocidade:2.8+Math.random()*.5,
+   proximoAtaque:0,
+   vivo:true
+  });
+ }
 }
 
-// Projéteis de energia fantasiosa
-const projetilMat=material(0x32efff,{
- emissive:0x00aaff,
- emissiveIntensity:2
-});
-const projeteis=[];
+criarInimigos();
 
-function disparar(){
- if(!jogando || acabou)return;
+// ESTADO
 
- let alvo=null;
- let menor=22;
-
- for(const e of inimigos){
-  if(!e.vivo)continue;
-  const d=jogador.position.distanceTo(e.obj.position);
-  if(d<menor){
-   menor=d;
-   alvo=e;
-  }
- }
- if(!alvo){
-  mostrarAviso("Nenhum adversário próximo!");
-  return;
- }
-
- const bola=new THREE.Mesh(
-  new THREE.SphereGeometry(.25,10,10),projetilMat
- );
- bola.position.copy(jogador.position);
- bola.position.y+=1.8;
- cena.add(bola);
-
- const destino=alvo.obj.position.clone();
- destino.y+=1.4;
-
- projeteis.push({
-  obj:bola,alvo:alvo,
-  destino:destino,
-  tempo:0
- });
-}
-
-// Estado do jogo
 let pontos=0;
 let vida=100;
 let acabou=false;
 let jogando=false;
+
 let camYaw=0;
+
 let joystickX=0;
 let joystickY=0;
+
+let velocidadeX=0;
+let velocidadeZ=0;
+
 let pulando=false;
 let alturaPulo=0;
 let velocidadeVertical=0;
+
 let ultimoTempo=0;
-let tempoDano=0;
+let ultimoDisparo=0;
+
+const projeteis=[];
 
 const barra=document.getElementById("barraVida");
 const textoVida=document.getElementById("vidaTexto");
@@ -440,142 +442,90 @@ const mensagem=document.getElementById("mensagem");
 const aviso=document.getElementById("aviso");
 
 function atualizarHUD(){
+
  barra.style.width=Math.max(0,vida)+"%";
- textoVida.textContent=Math.max(0,Math.ceil(vida))+" / 100";
+
+ textoVida.textContent=
+ Math.max(0,Math.ceil(vida))+" / 100";
+
  textoPontos.textContent="Pontos: "+pontos;
- textoInimigos.textContent="Inimigos: "+
- inimigos.filter(e=>e.vivo).length;
+
+ textoInimigos.textContent=
+ "Inimigos: "+inimigos.filter(e=>e.vivo).length;
 }
+
+let avisoTimer;
 
 function mostrarAviso(txt){
  aviso.textContent=txt;
  aviso.style.display="block";
- setTimeout(()=>aviso.style.display="none",900);
+
+ clearTimeout(avisoTimer);
+
+ avisoTimer=setTimeout(()=>{
+  aviso.style.display="none";
+ },1000);
 }
 
-function finalizar(vitoria){
- acabou=true;
- jogando=false;
- mensagem.style.display="flex";
+// COMBATE
 
- document.getElementById("caixa").innerHTML=
- vitoria?
- `<h1>VITÓRIA!</h1>
- <p>Você venceu a batalha!</p>
- <p>Pontuação: ${pontos}</p>
- <button id="jogar">JOGAR NOVAMENTE</button>`:
- `<h1>FIM DE JOGO</h1>
- <p>Vamos tentar novamente?</p>
- <button id="jogar">JOGAR NOVAMENTE</button>`;
+const projetilMat=material(0x32efff,{
+ emissive:0x00aaff,
+ emissiveIntensity:2
+});
 
- document.getElementById("jogar").onclick=reiniciar;
-}
+function disparar(){
 
-function reiniciar(){
- pontos=0;
- vida=100;
- acabou=false;
- jogando=true;
- camYaw=0;
- joystickX=0;
- joystickY=0;
- pulando=false;
- alturaPulo=0;
- velocidadeVertical=0;
+ if(!jogando||acabou)return;
 
- jogador.position.set(0,0,0);
+ const agora=performance.now();
 
- inimigos.forEach((e,i)=>{
-  let a=i*Math.PI/3;
-  e.obj.position.set(
-   Math.sin(a)*35,0,Math.cos(a)*35
-  );
-  e.vida=3;
-  e.vivo=true;
-  e.obj.visible=true;
-  e.proximoAtaque=0;
- });
+ if(agora-ultimoDisparo<350)return;
 
- projeteis.forEach(p=>cena.remove(p.obj));
- projeteis.length=0;
+ ultimoDisparo=agora;
 
- mensagem.style.display="none";
- atualizarHUD();
-}
+ let alvo=null;
+ let menor=25;
 
-// Movimento
-function limitar(v,min,max){
- return Math.max(min,Math.min(max,v));
-}
+ for(const e of inimigos){
 
-function atualizarJogador(dt){
- const velocidade=9;
- const forward=new THREE.Vector3(
-  Math.sin(camYaw),0,-Math.cos(camYaw)
- );
- const right=new THREE.Vector3(
-  Math.cos(camYaw),0,Math.sin(camYaw)
- );
+  if(!e.vivo)continue;
 
- const movimento=new THREE.Vector3();
- movimento.addScaledVector(forward,-joystickY);
- movimento.addScaledVector(right,joystickX);
+  const d=jogador.position.distanceTo(e.obj.position);
 
- if(movimento.length()>1)movimento.normalize();
-
- jogador.position.x+=movimento.x*velocidade*dt;
- jogador.position.z+=movimento.z*velocidade*dt;
-
- jogador.position.x=limitar(jogador.position.x,-85,85);
- jogador.position.z=limitar(jogador.position.z,-85,85);
-
- if(movimento.length()>.05){
-  jogador.rotation.y=Math.atan2(
-   movimento.x,movimento.z
-  );
- }
-
- if(pulando){
-  velocidadeVertical-=20*dt;
-  alturaPulo+=velocidadeVertical*dt;
-  if(alturaPulo<=0){
-   alturaPulo=0;
-   velocidadeVertical=0;
-   pulando=false;
+  if(d<menor){
+   menor=d;
+   alvo=e;
   }
  }
- jogador.position.y=alturaPulo;
-}
 
-// Inteligência dos adversários
-function atualizarInimigos(dt){
- const agora=performance.now()/1000;
+ if(!alvo){
+  mostrarAviso("Nenhum adversário próximo!");
+  return;
+ }
 
- inimigos.forEach(e=>{
-  if(!e.vivo)return;
+ const bola=new THREE.Mesh(
+  new THREE.SphereGeometry(.25,12,10),
+  projetilMat
+ );
 
-  const obj=e.obj;
-  const dx=jogador.position.x-obj.position.x;
-  const dz=jogador.position.z-obj.position.z;
-  const dist=Math.sqrt(dx*dx+dz*dz);
+ bola.position.copy(jogador.position);
+ bola.position.y+=1.8;
 
-  if(dist>1.6){
-   const velocidade=e.velocidade;
-   obj.position.x+=(dx/dist)*velocidade*dt;
-   obj.position.z+=(dz/dist)*velocidade*dt;
-   obj.rotation.y=Math.atan2(dx,dz);
-  }else if(agora>e.proximoAtaque){
-   vida=Math.max(0,vida-5);
-   e.proximoAtaque=agora+1.7;
-   atualizarHUD();
-   if(vida<=0)finalizar(false);
-  }
+ cena.add(bola);
+
+ projeteis.push({
+  obj:bola,
+  alvo:alvo
  });
 }
 
-// Atualização dos disparos
+// ATUALIZAR PROJÉTEIS
+
 function atualizarProjeteis(dt){
+
  for(let i=projeteis.length-1;i>=0;i--){
+
   const p=projeteis[i];
 
   if(!p.alvo.vivo){
@@ -590,35 +540,176 @@ function atualizarProjeteis(dt){
   const direcao=destino.clone().sub(p.obj.position);
   const distancia=direcao.length();
 
-  if(distancia<.9){
+  if(distancia<.8){
+
    p.alvo.vida--;
 
    if(p.alvo.vida<=0){
+
     p.alvo.vivo=false;
     p.alvo.obj.visible=false;
     pontos+=100;
+
    }else{
     pontos+=20;
    }
 
    cena.remove(p.obj);
    projeteis.splice(i,1);
+
    atualizarHUD();
 
    if(inimigos.every(e=>!e.vivo)){
     finalizar(true);
     return;
    }
+
    continue;
   }
 
   direcao.normalize();
-  p.obj.position.addScaledVector(direcao,24*dt);
+
+  p.obj.position.addScaledVector(
+   direcao,30*dt
+  );
  }
 }
 
-// Câmera em terceira pessoa
+// MOVIMENTO DO JOGADOR
+
+function limitar(v,min,max){
+ return Math.max(min,Math.min(max,v));
+}
+
+const teclas={};
+
+function atualizarJogador(dt){
+
+ // Movimento da câmera
+ const forward=new THREE.Vector3(
+  Math.sin(camYaw),0,-Math.cos(camYaw)
+ );
+
+ const right=new THREE.Vector3(
+  Math.cos(camYaw),0,Math.sin(camYaw)
+ );
+
+ // Movimento do joystick
+ const movimento=new THREE.Vector3();
+
+ movimento.addScaledVector(forward,-joystickY);
+ movimento.addScaledVector(right,joystickX);
+
+ // Movimento do teclado separado
+ let tecladoX=0;
+ let tecladoY=0;
+
+ if(teclas["w"]||teclas["arrowup"])tecladoY-=1;
+ if(teclas["s"]||teclas["arrowdown"])tecladoY+=1;
+ if(teclas["a"]||teclas["arrowleft"])tecladoX-=1;
+ if(teclas["d"]||teclas["arrowright"])tecladoX+=1;
+
+ movimento.addScaledVector(forward,-tecladoY);
+ movimento.addScaledVector(right,tecladoX);
+
+ if(movimento.length()>1)movimento.normalize();
+
+ // Aceleração suave
+ const velocidade=9;
+
+ const destinoX=movimento.x*velocidade;
+ const destinoZ=movimento.z*velocidade;
+
+ const suavidade=Math.min(1,dt*12);
+
+ velocidadeX=THREE.MathUtils.lerp(
+  velocidadeX,destinoX,suavidade
+ );
+
+ velocidadeZ=THREE.MathUtils.lerp(
+  velocidadeZ,destinoZ,suavidade
+ );
+
+ jogador.position.x+=velocidadeX*dt;
+ jogador.position.z+=velocidadeZ*dt;
+
+ jogador.position.x=limitar(
+  jogador.position.x,-85,85
+ );
+
+ jogador.position.z=limitar(
+  jogador.position.z,-85,85
+ );
+
+ // Personagem olha para onde está andando
+ if(Math.abs(velocidadeX)+Math.abs(velocidadeZ)>.2){
+
+  jogador.rotation.y=Math.atan2(
+   -velocidadeX,-velocidadeZ
+  );
+ }
+
+ // PULO
+ if(pulando){
+
+  velocidadeVertical-=20*dt;
+  alturaPulo+=velocidadeVertical*dt;
+
+  if(alturaPulo<=0){
+   alturaPulo=0;
+   velocidadeVertical=0;
+   pulando=false;
+  }
+ }
+
+ jogador.position.y=alturaPulo;
+}
+
+// INIMIGOS INTELIGENTES
+
+function atualizarInimigos(dt){
+
+ const agora=performance.now()/1000;
+
+ inimigos.forEach(e=>{
+
+  if(!e.vivo)return;
+
+  const obj=e.obj;
+
+  const dx=jogador.position.x-obj.position.x;
+  const dz=jogador.position.z-obj.position.z;
+
+  const dist=Math.sqrt(dx*dx+dz*dz);
+
+  // Persegue o jogador
+  if(dist>1.8){
+
+   obj.position.x+=(dx/dist)*e.velocidade*dt;
+   obj.position.z+=(dz/dist)*e.velocidade*dt;
+
+   obj.rotation.y=Math.atan2(-dx,-dz);
+
+  }else if(agora>e.proximoAtaque){
+
+   vida=Math.max(0,vida-4);
+
+   e.proximoAtaque=agora+1.5;
+
+   atualizarHUD();
+
+   if(vida<=0){
+    finalizar(false);
+   }
+  }
+
+ });
+}
+
+// CÂMERA EM TERCEIRA PESSOA
+
 function atualizarCamera(dt){
+
  const distancia=8;
  const altura=4.2;
 
@@ -628,7 +719,9 @@ function atualizarCamera(dt){
   jogador.position.z+Math.cos(camYaw)*distancia
  );
 
- camera.position.lerp(alvo,Math.min(1,dt*5));
+ camera.position.lerp(
+  alvo,Math.min(1,dt*5)
+ );
 
  const olhar=new THREE.Vector3(
   jogador.position.x,
@@ -639,13 +732,17 @@ function atualizarCamera(dt){
  camera.lookAt(olhar);
 }
 
-// Controles do joystick
+// JOYSTICK
+
 const joystick=document.getElementById("joystick");
 const bola=document.getElementById("bola");
+
 let toqueJoystick=null;
 
 function moverJoystick(e){
+
  const r=joystick.getBoundingClientRect();
+
  const cx=r.left+r.width/2;
  const cy=r.top+r.height/2;
 
@@ -654,6 +751,7 @@ function moverJoystick(e){
 
  const max=37;
  const dist=Math.sqrt(dx*dx+dy*dy);
+
  if(dist>max){
   dx=dx/dist*max;
   dy=dy/dist*max;
@@ -662,44 +760,65 @@ function moverJoystick(e){
  joystickX=dx/max;
  joystickY=dy/max;
 
- bola.style.transform=`translate(${dx}px,${dy}px)`;
+ bola.style.transform=
+ `translate(${dx}px,${dy}px)`;
 }
 
 joystick.addEventListener("pointerdown",e=>{
+
+ e.preventDefault();
+
  toqueJoystick=e.pointerId;
+
  joystick.setPointerCapture(e.pointerId);
+
  moverJoystick(e);
 });
 
 joystick.addEventListener("pointermove",e=>{
- if(e.pointerId===toqueJoystick)moverJoystick(e);
+
+ if(e.pointerId===toqueJoystick){
+  moverJoystick(e);
+ }
 });
 
 function soltarJoystick(){
+
  toqueJoystick=null;
+
  joystickX=0;
  joystickY=0;
+
  bola.style.transform="translate(0,0)";
 }
+
 joystick.addEventListener("pointerup",soltarJoystick);
 joystick.addEventListener("pointercancel",soltarJoystick);
 
-// Girar câmera com o lado direito
+// CÂMERA PELO TOQUE
+
 let toqueCamera=null;
 let ultimaX=0;
 
 renderer.domElement.addEventListener("pointerdown",e=>{
+
  if(e.clientX>innerWidth*.45){
+
   toqueCamera=e.pointerId;
   ultimaX=e.clientX;
+
   renderer.domElement.setPointerCapture(e.pointerId);
  }
 });
 
 renderer.domElement.addEventListener("pointermove",e=>{
+
  if(e.pointerId===toqueCamera){
+
   const dx=e.clientX-ultimaX;
-  camYaw-=dx*.003;
+
+  camYaw-=dx*.002;
+
   ultimaX=e.clientX;
  }
 });
@@ -712,6 +831,8 @@ renderer.domElement.addEventListener("pointercancel",()=>{
  toqueCamera=null;
 });
 
+// BOTÃO DE ENERGIA
+
 document.getElementById("atacar").addEventListener(
  "pointerdown",e=>{
   e.preventDefault();
@@ -719,63 +840,154 @@ document.getElementById("atacar").addEventListener(
  }
 );
 
+// BOTÃO PULAR
+
 document.getElementById("pular").addEventListener(
  "pointerdown",e=>{
+
   e.preventDefault();
-  if(!pulando && jogando){
+
+  if(!pulando&&jogando){
+
    pulando=true;
    velocidadeVertical=8;
   }
  }
 );
 
-// Teclado
-const teclas={};
+// TECLADO
+
 window.addEventListener("keydown",e=>{
+
  teclas[e.key.toLowerCase()]=true;
- if(e.key===" " && !pulando && jogando){
+
+ if(e.key===" "&&!pulando&&jogando){
+
   pulando=true;
   velocidadeVertical=8;
  }
- if(e.key.toLowerCase()==="f")disparar();
+
+ if(e.key.toLowerCase()==="f"){
+  disparar();
+ }
 });
+
 window.addEventListener("keyup",e=>{
  teclas[e.key.toLowerCase()]=false;
 });
 
-function atualizarTeclado(){
- if(teclas["w"]||teclas["arrowup"])joystickY=-1;
- else if(teclas["s"]||teclas["arrowdown"])joystickY=1;
- else joystickY=0;
+// FINALIZAR
 
- if(teclas["a"]||teclas["arrowleft"])joystickX=-1;
- else if(teclas["d"]||teclas["arrowright"])joystickX=1;
- else joystickX=0;
+function finalizar(vitoria){
+
+ if(acabou)return;
+
+ acabou=true;
+ jogando=false;
+
+ mensagem.style.display="flex";
+
+ document.getElementById("caixa").innerHTML=
+
+ vitoria?
+ `<h1>VITÓRIA!</h1>
+ <p>Você venceu a batalha!</p>
+ <p>Pontuação: ${pontos}</p>
+ <button id="jogar">JOGAR NOVAMENTE</button>`:
+
+ `<h1>FIM DE JOGO</h1>
+ <p>Tente novamente!</p>
+ <button id="jogar">JOGAR NOVAMENTE</button>`;
+
+ document.getElementById("jogar").onclick=reiniciar;
 }
+
+// REINICIAR
+
+function reiniciar(){
+
+ pontos=0;
+ vida=100;
+ acabou=false;
+ jogando=true;
+
+ camYaw=0;
+
+ joystickX=0;
+ joystickY=0;
+
+ velocidadeX=0;
+ velocidadeZ=0;
+
+ pulando=false;
+ alturaPulo=0;
+ velocidadeVertical=0;
+
+ jogador.position.set(0,0,0);
+ jogador.rotation.set(0,0,0);
+
+ inimigos.forEach((e,i)=>{
+
+  const a=i*Math.PI/3;
+
+  e.obj.position.set(
+   Math.sin(a)*30,0,
+   Math.cos(a)*30
+  );
+
+  e.vida=3;
+  e.vivo=true;
+  e.obj.visible=true;
+  e.proximoAtaque=0;
+ });
+
+ projeteis.forEach(p=>{
+  cena.remove(p.obj);
+ });
+
+ projeteis.length=0;
+
+ mensagem.style.display="none";
+
+ atualizarHUD();
+}
+
+// INICIAR
 
 document.getElementById("jogar").onclick=reiniciar;
 
+// ANIMAÇÃO
+
 function animar(tempo){
+
  requestAnimationFrame(animar);
 
- const dt=Math.min((tempo-ultimoTempo)/1000,.04);
+ const dt=ultimoTempo?
+ Math.min((tempo-ultimoTempo)/1000,.04):0;
+
  ultimoTempo=tempo;
 
- if(jogando && !acabou){
-  atualizarTeclado();
+ if(jogando&&!acabou){
+
   atualizarJogador(dt);
   atualizarInimigos(dt);
   atualizarProjeteis(dt);
  }
 
  atualizarCamera(dt);
+
  renderer.render(cena,camera);
 }
+
 requestAnimationFrame(animar);
 
+// REDIMENSIONAMENTO
+
 window.addEventListener("resize",()=>{
+
  camera.aspect=innerWidth/innerHeight;
  camera.updateProjectionMatrix();
+
  renderer.setSize(innerWidth,innerHeight);
 });
 
@@ -783,7 +995,8 @@ atualizarHUD();
 
 </script>
 </body>
-</html>
+ </html>
+
 
 
 
