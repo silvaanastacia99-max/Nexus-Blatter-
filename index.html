@@ -935,10 +935,74 @@ toqueCamera=null;
 });
 
 renderer.domElement.addEventListener("pointercancel",()=>{
-toqueCamera=null;
+toqueCamera=n
+$("atacar").addEventListener("pointerdown",e=>{
+ e.preventDefault();
+ disparar();
 });
 
-$("atacar").addEventListener("pointerdown",e=>
+$("especial").addEventListener("pointerdown",e=>{
+ e.preventDefault();
+ poderEspecial();
+});
+
+$("pular").addEventListener("pointerdown",e=>{
+ e.preventDefault();
+ if(jogando&&!pulando){
+  pulando=true;
+  velocidadeVertical=8;
+ }
+});
+
+window.addEventListener("keydown",e=>{
+ teclas[e.key.toLowerCase()]=true;
+ if(e.key===" "){
+  if(jogando&&!pulando){
+   pulando=true;
+   velocidadeVertical=8;
+  }
+ }
+ if(e.key.toLowerCase()==="f")disparar();
+});
+
+window.addEventListener("keyup",e=>{
+ teclas[e.key.toLowerCase()]=false;
+});
+
+window.addEventListener("resize",()=>{
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
+});
+
+let anterior=performance.now();
+
+function animar(agora){
+ requestAnimationFrame(animar);
+
+ const dt=Math.min((agora-anterior)/1000,.05);
+ anterior=agora;
+
+ if(jogando&&!acabou){
+  tempoJogo+=dt;
+  atualizarJogador(dt);
+  atualizarInimigos(dt);
+  atualizarProjeteis(dt);
+  atualizarCamera(dt);
+  desenharMinimapa();
+ }
+
+ renderer.render(cena,camera);
+}
+
+atualizarHUD();
+atualizarCamera(0);
+requestAnimationFrame(animar);
+
+</script>
+</body>
+</html>
+
 
 
 
