@@ -142,10 +142,25 @@ function trocarVisual(){
  cena.remove(jogador);jogador=novo;cena.add(jogador);$("personagemNome").textContent="Herói: "+h.nome;
 }
 function atingirInimigo(e,dano){
- if(!e.vivo)return;e.vida-=dano;
- if(e.vida<=0){e.vivo=false;e.obj.visible=false;pontos+=100;mostrarAviso("Adversário derrotado! +100")}
- else{pontos+=10}
- atualizarHUD();if(inimigos.every(x=>!x.vivo))finalizar(true);
+ if(!e || !e.vivo)return;
+
+ e.vida-=dano;
+
+ if(e.vida<=0){
+   e.vivo=false;
+   e.obj.visible=false;
+   pontos+=100;
+   mostrarAviso("Adversário derrotado! +100");
+ }else{
+   pontos+=10;
+   mostrarAviso("Acertou o adversário! +10");
+ }
+
+ atualizarHUD();
+
+ if(inimigos.every(x=>!x.vivo)){
+   finalizar(true);
+ }
 }
 function disparar(){
  if(!jogando||acabou)return;const agora=performance.now();if(agora-ultimoDisparo<360)return;ultimoDisparo=agora;
