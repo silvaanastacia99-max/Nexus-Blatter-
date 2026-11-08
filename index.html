@@ -92,21 +92,17 @@ h1{
 </style>
 </head>
 <body>
-<div id="hud">
- <div id="info">Pontos: 0 | Inimigos: 8</div>
- <div id="vidaFundo"><div id="vida"></div></div>
- <div id="ajuda">Explore o mapa e vença os desafios!</div>
 </div>
-<div id="aviso"></div>
-<div id="controles">
- <div id="direcoes">
-  <button class="control" id="cima">▲</button>
-  <button class="control" id="esquerda">◀</button>
-  <button class="control" id="baixo">▼</button>
-  <button class="control" id="direita">▶</button>
- </div>
- <button class="control" id="atacar">ENERGIA</button>
+<canvas id="mini" width="100" height="100"></canvas>
+<div id="controls">
+  <div id="stick"><div id="knob"></div></div>
+  <div class="buttons">
+    <button class="gamebtn" id="jump">PULAR</button>
+    <div class="buttonrow"><button class="gamebtn" id="power">PODER</button><button class="gamebtn" id="attack">ATACAR</button></div>
+  </div>
 </div>
+<div id="overlay">
+  <div id="box">
 
 <div id="tela">
  <h1>NexusBlatter 3D</h1>
