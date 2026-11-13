@@ -915,27 +915,14 @@ joystick.addEventListener("pointercancel",soltarJoystick);
 let toqueCamera=null;
 let ultimaX=0;
 
-renderer.domElement.addEventListener("pointerdown",e=>{
-if(e.clientX>innerWidth*.48){
-toqueCamera=e.pointerId;
-ultimaX=e.clientX;
-renderer.domElement.setPointerCapture(e.pointerId);
-}
-});
-
-renderer.domElement.addEventListener("pointermove",e=>{
-if(e.pointerId===toqueCamera){
-camYaw-=(e.clientX-ultimaX)*.003;
-ultimaX=e.clientX;
-}
-});
-
 renderer.domElement.addEventListener("pointerup",()=>{
-toqueCamera=null;
+ toqueCamera=null;
 });
 
 renderer.domElement.addEventListener("pointercancel",()=>{
-toqueCamera=n
+ toqueCamera=null;
+});
+
 $("atacar").addEventListener("pointerdown",e=>{
  e.preventDefault();
  disparar();
@@ -953,7 +940,6 @@ $("pular").addEventListener("pointerdown",e=>{
   velocidadeVertical=8;
  }
 });
-
 window.addEventListener("keydown",e=>{
  teclas[e.key.toLowerCase()]=true;
  if(e.key===" "){
