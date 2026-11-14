@@ -56,7 +56,574 @@ canvas{display:block}
   <span id="vidaTexto">100 / 100</span>
  </div>
 </div>
-<canvas id="minimap" width="180" height="180"></canvas>
+<canvas id="world"></canvas>
+<div id="shade"></div>
+
+<div id="topbar">
+ <div class="profile">
+  <div class="avatar" id="profileFace">🍥</div>
+  <div>
+   <div class="name">NexusBlatter</div>
+   <div class="small">Nv. 01 · Explorador</div>
+  </div>
+ </div>
+ <div class="currency">
+  <span>🪙 <b>0</b></span>
+  <span>💎 <b>0</b></span>
+ </div>
+ <div class="topicons">⚙️</div>
+</div>
+
+<div id="brand">
+ <h1>NEXUS<span>BLATTER</span></h1>
+ <p>ANIME BATTLE ROYALE · 3D</p>
+</div>
+
+<div id="leftmenu">
+ <button class="menuBtn active" data-panel="LOJA">🛒 LOJA</button>
+ <button class="menuBtn" data-panel="PERSONAGENS">👕 PERSONAGENS</button>
+ <button class="menuBtn" data-panel="ARMAS">✨ ENERGIA</button>
+ <button class="menuBtn" data-panel="MOCHILA">🎒 MOCHILA</button>
+ <button class="menuBtn" data-panel="MISSÕES">☑ MISSÕES</button>
+ <button class="menuBtn" data-panel="EVENTOS">🏆 EVENTOS</button>
+</div>
+
+<div id="rightpanel">
+ <h3>✦ ESCOLHA SEU PERSONAGEM</h3>
+ <div id="cards"></div>
+</div>
+
+<div id="bottomnav">
+ <button class="navBtn" data-panel="COFRE">▣ COFRE</button>
+ <button class="navBtn" data-panel="ARMAS">✦ ENERGIA</button>
+ <button class="navBtn active" data-panel="PERSONAGENS">♟ HERÓI</button>
+ <button class="navBtn" data-panel="PET">🐾 PET</button>
+ <button class="navBtn" data-panel="COLEÇÃO">▧ COLEÇÃO</button>
+ <button id="start">COMEÇAR ▶</button>
+</div>
+
+<div id="gamehud">
+ <div class="hudbox">
+  NEXUSBLATTER<br>
+  <span id="score">Pontos: 0</span><br>
+  <span id="enemyCount">Adversários: 8</span><br>
+  <span id="ammo">ENERGIA: 12 / 60</span>
+ </div>
+ <div class="hudbox">
+  VIDA
+  <div id="healthbar"><div id="healthfill"></div></div>
+  <span id="healthtext">100 / 100</span>
+ </div>
+</div>
+
+<div id="gamecontrols">
+ <div id="stick"><div id="knob"></div></div>
+ <div id="fightbuttons">
+  <button class="fight" id="jump">PULAR</button>
+  <button class="fight" id="energy">PODER</button>
+  <button class="fight" id="reload">RECARGA</button>
+  <button class="fight" id="attack">✦<br>ATIRAR</button>
+ </div>
+</div>
+
+<div id="cameraHint">Arraste o lado direito para girar a câmera</div>
+
+<div id="modal">
+ <div id="dialog">
+  <h2 id="modalTitle">NEXUSBLATTER</h2>
+  <div id="modalBody"></div>
+  <button class="action" id="modalClose">VOLTAR</button>
+ </div>
+</div>
+<div id="toast"></div>
+
+<script type="module">
+import * as THREE from
+'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+/* ELEMENTOS */
+const $=id=>document.getElementById(id);
+
+/* CENA */
+const canvas=$('world');
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x83c8f0);
+scene.fog=new THREE.Fog(0x83c8f0,105,260);
+
+const camera=new THREE.PerspectiveCamera(
+ 60,innerWidth/innerHeight,.1,450
+);
+
+const renderer=new THREE.WebGLRenderer({
+ canvas,antialias:true,powerPreference:'high-performance'
+});
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+
+/* LUZ */
+scene.add(new THREE.HemisphereLight(0xe4f4ff,0x52633b,1.65));
+
+const sun=new THREE.DirectionalLight(0xffedcf,2);
+sun.position.set(-40,75,30);
+sun.castShadow=true;
+sun.shadow.mapSize.set(1024,1024);
+scene.add(sun);
+
+/* MATERIAIS E OBJETOS */
+const mat=(color,extra={})=>
+ new THREE.MeshStandardMaterial({
+  color,roughness:.78,...extra
+ });
+
+function mesh(geo,material,x,y,z,parent=scene){
+ const m=new THREE.Mesh(geo,material);
+ m.position.set(x,y,z);
+ m.castShadow=true;
+ m.receiveShadow=true;
+ parent.add(m);
+ return m;
+}
+
+/* TERRENO */
+const grass=mat(0x438d3c);
+const roadMat=mat(0x777b7a);
+const bark=mat(0x62402d);
+const leaves=mat(0x24713b);
+
+const ground=mesh(
+ new THREE.PlaneGeometry(260,260),
+ grass,0,0,0
+);
+ground.rotation.x=-Math.PI/2;
+
+function road(x,z,w,d){
+ const m=mesh(new THREE.PlaneGeometry(w,d),roadMat,x,.035,z);
+ m.rotation.x=-Math.PI/2;
+}
+road(0,0,260,10);
+road(0,0,10,260);
+
+const lineMat=mat(0xd9d2a6);
+
+for(let i=-120;i<125;i+=12){
+ mesh(new THREE.BoxGeometry(5,.025,.12),lineMat,i,.07,0);
+ mesh(new THREE.BoxGeometry(.12,.025,5),lineMat,0,.07,i);
+}
+
+/* CASAS */
+function house(x,z,color,scale=1){
+ const g=new THREE.Group();
+ scene.add(g);
+ g.position.set(x,0,z);
+ g.scale.setScalar(scale);
+
+ mesh(new THREE.BoxGeometry(9,5.2,8),mat(color),0,2.6,0,g);
+
+ const roof=mesh(
+  new THREE.ConeGeometry(7,3.2,4),
+  mat(0x874a36),0,6.65,0,g
+ );
+ roof.rotation.y=Math.PI/4;
+
+ mesh(new THREE.BoxGeometry(1.45,2.7,.18),
+ mat(0x493024),0,1.35,4.08,g);
+
+ for(const xw of [-2.7,2.7]){
+  mesh(new THREE.BoxGeometry(1.5,1.35,.16),
+  mat(0x284f70),xw,3.4,4.08,g);
+ }
+}
+
+[
+ [-28,-28,0xd5b783,1.1],
+ [29,-32,0xd6a1a1,1.15],
+ [-42,30,0xd9dfd9,1],
+ [42,33,0xd5ad79,1.1],
+ [8,52,0xa9bfd0,.9],
+ [-58,-5,0xd8c58f,.95],
+ [62,-48,0xd0a16e,1.1]
+].forEach(v=>house(...v));
+
+/* ÁRVORES */
+function tree(x,z,s=1){
+ const g=new THREE.Group();
+ scene.add(g);
+ g.position.set(x,0,z);
+ g.scale.setScalar(s);
+
+ mesh(new THREE.CylinderGeometry(.28,.48,3.5,9),
+ bark,0,1.75,0,g);
+
+ mesh(new THREE.SphereGeometry(2.25,14,12),
+ leaves,0,4.1,0,g);
+
+ mesh(new THREE.SphereGeometry(1.55,12,10),
+ mat(0x318344),1.1,4.55,.15,g);
+}
+
+for(let i=0;i<95;i++){
+ const x=(Math.random()-.5)*240;
+ const z=(Math.random()-.5)*240;
+ if(Math.abs(x)<14||Math.abs(z)<14)continue;
+ tree(x,z,.7+Math.random()*.65);
+}
+
+/* MONTANHAS */
+for(let i=0;i<18;i++){
+ const a=i/18*Math.PI*2;
+ const r=118;
+ const m=mesh(
+  new THREE.ConeGeometry(15,35,5),
+  mat(i%2?0x667d83:0x7c8b91),
+  Math.sin(a)*r,12,Math.cos(a)*r
+ );
+ m.rotation.z=(Math.random()-.5)*.18;
+}
+
+/* PERSONAGENS */
+const roster=[
+ {name:'Naruto',hair:0xf1b52d,cloth:0xe47720,accent:0x202a3d,face:'🍥',power:'Redemoinho'},
+ {name:'Sasuke',hair:0x18264c,cloth:0x394e83,accent:0x101c34,face:'⚡',power:'Raio'},
+ {name:'Nami',hair:0xe87924,cloth:0x258b9b,accent:0x18374b,face:'🌩️',power:'Tempestade'},
+ {name:'Zoro',hair:0x69a34c,cloth:0x28523c,accent:0x172c26,face:'⚔️',power:'Corte de energia'},
+ {name:'Luffy',hair:0x241a13,cloth:0xc52c26,accent:0x242c39,face:'👒',power:'Impacto elástico'},
+ {name:'Goku',hair:0x171717,cloth:0xe59b27,accent:0x244e9a,face:'🔥',power:'Energia'},
+ {name:'Vegeta',hair:0x171717,cloth:0x315baf,accent:0xe4e8ee,face:'💥',power:'Explosão'},
+ {name:'Tanjiro',hair:0x28201b,cloth:0x31563e,accent:0x22252c,face:'☀️',power:'Respiração solar'},
+ {name:'Nezuko',hair:0x29202b,cloth:0xb65a8b,accent:0x44243e,face:'🌸',power:'Escudo floral'},
+ {name:'Ichigo',hair:0xf08b35,cloth:0x22242d,accent:0x101522,face:'🗡️',power:'Energia espiritual'}
+];
+
+function fighter(data){
+ const g=new THREE.Group();
+
+ const skin=mat(0xe9b895);
+ const hair=mat(data.hair);
+ const shirt=mat(data.cloth);
+ const pants=mat(data.accent);
+ const boot=mat(0x202532);
+ const eye=mat(0x202b3d);
+
+ // Tronco
+ const torso=mesh(
+  new THREE.CapsuleGeometry(.43,.68,6,12),
+  shirt,0,1.48,0,g
+ );
+ torso.scale.set(1.05,1,.72);
+
+ // Cabeça
+ mesh(new THREE.SphereGeometry(.31,16,14),
+ skin,0,2.43,0,g);
+
+ // Cabelo
+ mesh(new THREE.SphereGeometry(.36,16,12),
+ hair,0,2.68,.015,g);
+
+ for(let k=0;k<7;k++){
+  const a=k/7*Math.PI*2;
+  const spike=mesh(
+   new THREE.ConeGeometry(.13,.42,7),
+   hair,Math.cos(a)*.23,2.89,Math.sin(a)*.22,g
+  );
+  spike.rotation.z=-Math.cos(a)*.55;
+  spike.rotation.x=Math.sin(a)*.45;
+ }
+
+ // Olhos
+ mesh(new THREE.SphereGeometry(.055,10,8),
+ eye,-.13,2.47,-.29,g);
+ mesh(new THREE.SphereGeometry(.055,10,8),
+ eye,.13,2.47,-.29,g);
+
+ // Braços e pernas
+ for(const side of [-1,1]){
+  const arm=mesh(
+   new THREE.CapsuleGeometry(.14,.48,5,9),
+   shirt,side*.52,1.54,0,g
+  );
+  arm.rotation.z=side*-.16;
+
+  mesh(new THREE.SphereGeometry(.145,12,10),
+   skin,side*.57,1.18,-.015,g);
+
+  const leg=mesh(
+   new THREE.CapsuleGeometry(.17,.48,5,9),
+   pants,side*.2,.55,0,g
+  );
+  leg.rotation.z=side*.035;
+
+  mesh(new THREE.CapsuleGeometry(.17,.2,4,8),
+   boot,side*.2,.16,-.045,g);
+ }
+
+ // Cinto e detalhes
+ const belt=mesh(
+  new THREE.TorusGeometry(.34,.045,8,24),
+  mat(0x242b36),0,.98,0,g
+ );
+ belt.rotation.x=Math.PI/2;
+
+ // Mochila visual
+ mesh(new THREE.BoxGeometry(.55,.65,.22),
+  mat(0x263e59),0,1.45,.42,g);
+
+ return g;
+}
+
+/* JOGADOR */
+let selected=0;
+const player=fighter(roster[0]);
+scene.add(player);
+
+const ring=mesh(
+ new THREE.TorusGeometry(2.25,.065,10,64),
+ mat(0x24cfff,{emissive:0x087bff,emissiveIntensity:1}),
+ 0,.1,0
+);
+ring.rotation.x=Math.PI/2;
+
+/* SELEÇÃO */
+const cards=$('cards');
+
+roster.forEach((c,i)=>{
+ const b=document.createElement('button');
+ b.className='charCard'+(i===0?' selected':'');
+ b.innerHTML=
+  `<div class="portrait">${c.face}</div><span>${c.name}</span>`;
+
+ b.onclick=()=>{
+  if(game)return;
+  selected=i;
+  const fresh=fighter(roster[i]);
+  player.clear();
+  while(fresh.children.length){
+   player.add(fresh.children[0]);
+  }
+  $('profileFace').textContent=c.face;
+
+  document.querySelectorAll('.charCard').forEach((el,n)=>{
+   el.classList.toggle('selected',n===i);
+  });
+
+  toast(c.name+' selecionado · '+c.power);
+ };
+ cards.appendChild(b);
+});
+
+/* ESTADO DO JOGO */
+let enemies=[];
+let shots=[];
+let game=false;
+let ended=false;
+let score=0;
+let health=100;
+let ammo=12;
+let reserve=60;
+
+let yaw=0;
+let sx=0;
+let sy=0;
+let vertical=0;
+let jumping=false;
+
+let lastShot=0;
+let lastPower=0;
+let lastDamage=0;
+let reloading=false;
+
+const clock=new THREE.Clock();
+
+/* AVISOS */
+function toast(t){
+ const e=$('toast');
+ e.textContent=t;
+ e.style.display='block';
+ clearTimeout(toast.timer);
+ toast.timer=setTimeout(()=>{
+  e.style.display='none';
+ },1600);
+}
+
+/* PAINÉIS */
+const panels={
+ LOJA:'<p>Loja de visuais e equipamentos cosméticos.</p><p>🪙 Moedas: 0 · 💎 Cristais: 0</p>',
+ PERSONAGENS:'<p>Escolha seu herói no painel de personagens.</p>',
+ ARMAS:'<p>✦ Energia azul<br>⚡ Poder especial<br>🛡 Escudo de energia</p>',
+ MOCHILA:'<p>🎒 Mochila Nexus</p><p>Energia: '+ammo+'<br>Reserva: '+reserve+'</p><p>Equipamento cosmético disponível.</p>',
+ MISSÕES:'<p>★ Explore a arena<br>★ Encontre os adversários<br>★ Complete o desafio</p>',
+ EVENTOS:'<p>🏆 Evento de estreia: Desafio Nexus.</p>',
+ COFRE:'<p>Seu cofre está pronto para receber recompensas.</p>',
+ PET:'<p>🐾 Companheiro Nexus — em breve.</p>',
+ COLEÇÃO:'<p>Personagens e visuais disponíveis na coleção.</p>'
+};
+
+function modal(title,body){
+ $('modalTitle').textContent=title;
+ $('modalBody').innerHTML=body;
+ $('modal').style.display='flex';
+}
+$('modalClose').onclick=()=>{$('modal').style.display='none'};
+
+document.querySelectorAll('[data-panel]').forEach(b=>{
+ b.onclick=()=>{
+  if(game)return;
+  document.querySelectorAll('[data-panel]').forEach(x=>{
+   x.classList.remove('active');
+  });
+  b.classList.add('active');
+  modal(b.dataset.panel,panels[b.dataset.panel]||'<p>Em preparação.</p>');
+ };
+});
+
+/* ADVERSÁRIOS */
+function spawn(){
+ enemies.forEach(e=>scene.remove(e.obj));
+ enemies.length=0;
+
+ for(let i=0;i<8;i++){
+  const obj=fighter(roster[(i+2)%roster.length]);
+  const a=i*Math.PI/4;
+  const dist=27+(i%3)*8;
+
+  obj.position.set(Math.sin(a)*dist,0,Math.cos(a)*dist);
+  scene.add(obj);
+
+  enemies.push({
+   obj,
+   hp:3,
+   alive:true,
+   speed:1.4+i*.08,
+   attackTimer:0
+  });
+ }
+}
+
+/* HUD */
+function hud(){
+ $('healthfill').style.width=health+'%';
+ $('healthtext').textContent=Math.ceil(health)+' / 100';
+ $('score').textContent='Pontos: '+score;
+ $('enemyCount').textContent=
+  'Adversários: '+enemies.filter(e=>e.alive).length;
+ $('ammo').textContent='ENERGIA: '+ammo+' / '+reserve;
+}
+
+/* INICIAR PARTIDA */
+function startGame(){
+ score=0;
+ health=100;
+ ammo=12;
+ reserve=60;
+ ended=false;
+ game=true;
+ yaw=0;
+ sx=0;
+ sy=0;
+ jumping=false;
+ vertical=0;
+ reloading=false;
+
+ player.position.set(0,0,0);
+ player.rotation.y=0;
+
+ spawn();
+
+ shots.forEach(s=>scene.remove(s.obj));
+ shots=[];
+
+ $('modal').style.display='none';
+ $('gamehud').style.display='flex';
+ $('gamecontrols').style.display='flex';
+ $('cameraHint').style.display='block';
+
+ $('bottomnav').style.display='none';
+ $('leftmenu').style.display='none';
+ $('rightpanel').style.display='none';
+ $('brand').style.display='none';
+
+ hud();
+ toast('Batalha Nexus iniciada!');
+}
+
+$('start').onclick=startGame;
+
+/* ENCERRAR PARTIDA */
+function endGame(win){
+ if(ended)return;
+
+ ended=true;
+ game=false;
+
+ $('gamecontrols').style.display='none';
+ $('cameraHint').style.display='none';
+ $('gamehud').style.display='none';
+
+ $('bottomnav').style.display='flex';
+ $('leftmenu').style.display='flex';
+ $('rightpanel').style.display='block';
+ $('brand').style.display='block';
+
+ modal(
+  win?'VITÓRIA!':'FIM DE JOGO',
+  `<p>${win?'Você venceu a arena Nexus!':'Sua energia acabou. Tente novamente!'}</p>
+   <p>Pontuação: ${score}</p>
+   <button class="action" id="again">JOGAR NOVAMENTE</button>`
+ );
+
+ $('again').onclick=startGame;
+}
+
+/* DISPARO DE ENERGIA */
+function shoot(power=false){
+ if(!game||ended)return;
+
+ const now=performance.now();
+
+ if(power){
+  if(now-lastPower<4500){
+   toast('Poder recarregando!');
+   return;
+  }
+  lastPower=now;
+ }else{
+  if(now-lastShot<300)return;
+  lastShot=now;
+
+  if(ammo<=0){
+   toast('Sem energia! Recarregue.');
+   return;
+  }
+  ammo--;
+ }
+
+ // Projétil de fantasia
+ const color=power?0xb46bff:0x27e8ff;
+
+ const orb=mesh(
+  new THREE.SphereGeometry(power?.42:.23,12,10),
+  mat(color,{
+   emissive:color,
+   emissiveIntensity:1.5
+  }),
+  player.position.x,
+  player.position.y+1.6,
+  player.position.z
+ );
+
+ const direction=new THREE.Vector3(
+const alvo=new THREE.Vector3(
+   jogador.position.x-Math.sin(cameraAngulo)*8,
+   jogador.position.y+5,
+   jogador.position.z-Math.cos(cameraAngulo)*8
+  );
+  camera.position.lerp(alvo,1-Math.exp(-5*dt));
+  camera.lookAt(jogador.po
+</script>
+</body>
+</html  <canvas id="minimap" width="180" height="180"></canvas>
 <div id="dica">Arraste a tela para girar a câmera</div>
 
 <div id="controles">
